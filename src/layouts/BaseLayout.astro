@@ -1,0 +1,37 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import GrowthGround from '../components/GrowthGround.astro';
+const { title } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — Robocobra Quartet</title>
+    <ClientRouter />
+  </head>
+  <body>
+    <GrowthGround />
+    <div class="shell">
+      <Nav />
+      <main><slot /></main>
+      <Footer />
+    </div>
+    <style is:global>
+      :root{ --ground:#17b6c9; --ink:#f4f3ee; --scrim:rgba(0,0,0,.26);
+        --sans:"Helvetica Neue",Helvetica,Arial,system-ui,sans-serif; }
+      *{box-sizing:border-box}
+      html,body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.55}
+      .shell{max-width:960px;margin:0 auto;padding:0 clamp(16px,4vw,32px) 64px;position:relative;z-index:1}
+      main :is(h1,h2){letter-spacing:-.02em;text-wrap:balance}
+      a{color:var(--ink)}
+      .prose{max-width:65ch}
+      .prose > *{ }
+      /* body copy sits on the legibility scrim on the seeded ground */
+      .scrim{background:var(--scrim);backdrop-filter:blur(4px);border-radius:12px;padding:1rem 1.25rem}
+    </style>
+  </body>
+</html>
