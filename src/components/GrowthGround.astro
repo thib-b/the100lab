@@ -1,1 +1,30 @@
+---
+---
 <div id="growth-ground" transition:persist aria-hidden="true"></div>
+<script>
+  import { hourlySeed, pickPlateColor, PLATE_PALETTE } from '../lib/seed';
+  import { inkFor, scrimFor } from '../lib/color';
+  import { GrowthGround } from '../lib/growth';
+
+  function applyGround() {
+    const { hex } = pickPlateColor(hourlySeed(), PLATE_PALETTE);
+    const root = document.documentElement;
+    root.style.setProperty('--ground', hex);
+    root.style.setProperty('--ink', inkFor(hex));
+    root.style.setProperty('--scrim', scrimFor(hex));
+    return hex;
+  }
+  const hex = applyGround();
+  const w = window as any;
+  if (!w.__growth) {
+    const el = document.getElementById('growth-ground')!;
+    w.__growth = new GrowthGround(el, { groundHex: hex, intensity: 0.4 });
+    w.__growth.start();
+  }
+  // Element persists across view transitions; re-assert CSS vars after each swap.
+  document.addEventListener('astro:after-swap', applyGround);
+</script>
+<style is:global>
+  #growth-ground{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  #growth-ground canvas{display:block;width:100%;height:100%;}
+</style>
