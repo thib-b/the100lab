@@ -17,3 +17,12 @@ test('image press shots load', async ({ page }) => {
   const img = page.locator('img[src="/assets/images/RQ1.jpeg"]');
   await expect(img).toBeVisible();
 });
+test('tour mounts the songkick widget', async ({ page }) => {
+  await page.goto('/tour/');
+  await expect(page.locator('#songkick-widget-8269433-3837')).toBeAttached();
+});
+test('contact shows emails and mailchimp form', async ({ page }) => {
+  await page.goto('/contact/');
+  await expect(page.getByRole('link', { name: 'robocobraquartet@gmail.com' })).toBeVisible();
+  await expect(page.locator('#mc-embedded-subscribe-form')).toBeAttached();
+});
