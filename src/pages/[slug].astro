@@ -11,5 +11,5 @@ const entry = await getEntry('sections', Astro.params.slug!);
 const { Content } = await render(entry);
 ---
 <BaseLayout title={entry.data.title}>
-  <article class="prose"><Content /></article>
+  <article class="prose scrim"><Content /></article>
 </BaseLayout>

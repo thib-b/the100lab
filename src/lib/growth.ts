@@ -29,7 +29,7 @@ export class GrowthGround {
     this.app.stage.addChild(this.layer);
     this.tex = softTexture();
     this.ready = true;
-    if (this.reduced) { this.scatterStatic(); return; }
+    if (this.reduced) { this.scatterStatic(); this.app.ticker.stop(); return; }
     this.app.ticker.add(() => this.tick());
     document.addEventListener('visibilitychange', () => {
       document.hidden ? this.app.ticker.stop() : this.app.ticker.start();
@@ -38,7 +38,7 @@ export class GrowthGround {
   setIntensity(n: number) { this.intensity = n; }
   private spawn() {
     const s = new Sprite(this.tex);
-    s.anchor.set(0.5); s.tint = 0xffffff; s.alpha = 0; s.blendMode = 'add';
+    s.anchor.set(0.5); s.alpha = 0; s.blendMode = 'add';
     s.x = Math.random() * this.app.renderer.width;
     s.y = Math.random() * this.app.renderer.height;
     const maxScale = 0.6 + Math.random() * 1.8; s.scale.set(maxScale * 0.15);
