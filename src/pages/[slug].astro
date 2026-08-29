@@ -1,0 +1,15 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const all = await getCollection('sections');
+  return all.filter((e) => e.id !== 'home').map((e) => ({ params: { slug: e.id } }));
+}
+
+const entry = await getEntry('sections', Astro.params.slug!);
+const { Content } = await render(entry);
+---
+<BaseLayout title={entry.data.title}>
+  <article class="prose"><Content /></article>
+</BaseLayout>
