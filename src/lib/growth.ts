@@ -123,7 +123,7 @@ export class GrowthGround {
     const size = Math.min(this.W, this.H) * 0.44, ox = this.cxc - size / 2, oy = this.cyc - size / 2;
     this.mx.drawImage(this.stamp, ox, oy, size, size);
     this.maskImg = this.mx.getImageData(0, 0, this.W * this.dpr, this.H * this.dpr).data;
-    this.nogoR = size * 0.60;
+    this.nogoR = size * 0.72;   // fully enclose the stamp square (half-diagonal ~0.707) so no colony spawns over the reveal
     this.edgePts = [];
     const step = Math.max(3, Math.round(3 * this.dpr));
     const A = (px: number, py: number) => {
