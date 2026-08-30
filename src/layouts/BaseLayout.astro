@@ -7,12 +7,19 @@ const { title } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/+$/, ''); // '' at root, '/the100lab' on Pages
 const description = 'Robocobra Quartet — Hundred Pieces. 100 pieces, coming 2026.';
 const ogImage = new URL(base + '/assets/images/og-cover.jpg', Astro.site).href;
+// Self-hosted TeX Gyre Heros (a Nimbus Sans / Helvetica-metric design, GUST Font License /
+// LPPL 1.3c — web-embeddable). Subset woff2; weight 600 maps to Bold (700). Base-aware string
+// because CSS url() can't read the Astro base path. Licence ships in /assets/fonts/.
+const fontCss = `@font-face{font-family:"TeX Gyre Heros";font-style:normal;font-weight:400;font-display:swap;src:url("${base}/assets/fonts/TeXGyreHeros-Regular.woff2") format("woff2")}@font-face{font-family:"TeX Gyre Heros";font-style:normal;font-weight:700;font-display:swap;src:url("${base}/assets/fonts/TeXGyreHeros-Bold.woff2") format("woff2")}`;
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href={base + '/assets/fonts/TeXGyreHeros-Regular.woff2'} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={base + '/assets/fonts/TeXGyreHeros-Bold.woff2'} as="font" type="font/woff2" crossorigin />
+    <style is:inline set:html={fontCss}></style>
     <script is:inline>
       // Pick the plate ground colour before first paint so there is no flash of the
       // default turquoise while GrowthGround's module script (deferred) spins up.
@@ -61,10 +68,10 @@ const ogImage = new URL(base + '/assets/images/og-cover.jpg', Astro.site).href;
     </div>
     <style is:global>
       :root{ --ground:#17b6c9; --ink:#f4f3ee; --scrim:rgba(0,0,0,.26); --logo-invert:0;
-        /* Helvetica Neue on Apple devices; metric-compatible fallbacks elsewhere
-           (Arial on Windows, Liberation Sans/Nimbus/Roboto on Linux/Android). Not self-hosted
-           — the band has no licence to embed Helvetica Neue. */
-        --sans:"Helvetica Neue",Helvetica,Arial,"Liberation Sans","Nimbus Sans",Roboto,system-ui,sans-serif; }
+        /* Self-hosted TeX Gyre Heros (the web-licensed Nimbus Sans / Helvetica design) is the
+           primary face on every device; the rest are metric-compatible fallbacks if it fails to
+           load (local Nimbus Sans, Helvetica Neue on Apple, Arial on Windows, Liberation Sans). */
+        --sans:"TeX Gyre Heros","Nimbus Sans","Helvetica Neue",Helvetica,Arial,"Liberation Sans",system-ui,sans-serif; }
       *{box-sizing:border-box}
       html,body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55}
       .shell{max-width:1000px;margin:0 auto;padding:0 clamp(18px,4vw,40px) 72px;position:relative;z-index:1}
