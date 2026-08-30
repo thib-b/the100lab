@@ -1,9 +1,5 @@
 ---
-import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-const entry = await getEntry('sections', 'home');
-const { Content } = await render(entry);
+import SplashHero from '../components/SplashHero.astro';
 ---
-<BaseLayout title={entry.data.title}>
-  <article class="prose scrim"><Content /></article>
-</BaseLayout>
+<BaseLayout title="The Hundred"><SplashHero /></BaseLayout>

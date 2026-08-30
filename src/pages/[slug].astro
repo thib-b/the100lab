@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
   const all = await getCollection('sections');
-  return all.filter((e) => e.id !== 'home').map((e) => ({ params: { slug: e.id } }));
+  return all.map((e) => ({ params: { slug: e.id } }));
 }
 
 const entry = await getEntry('sections', Astro.params.slug!);

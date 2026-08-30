@@ -1,0 +1,25 @@
+---
+import MailchimpForm from './MailchimpForm.astro';
+---
+<section class="splash">
+  <div class="intro scrim">
+    <p class="eyebrow">Robocobra Quartet</p>
+    <h1>THE HUNDRED</h1>
+    <p class="tagline">100 tracks · coming 2026</p>
+  </div>
+  <div id="splash-viz" aria-hidden="true"><!-- MVP2 Batch 2: original hero visualization mounts here --></div>
+  <div class="notify scrim">
+    <h2>Be the first to hear it.</h2>
+    <MailchimpForm />
+  </div>
+</section>
+<style>
+  .splash{max-width:900px;margin:0 auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2rem}
+  .intro{padding:2rem 1.6rem}
+  .eyebrow{margin:0 0 .4em;text-transform:uppercase;letter-spacing:.16em;font-size:.85rem;opacity:.85}
+  h1{font-size:clamp(2.6rem,8vw,5.5rem);line-height:1;letter-spacing:-.02em;margin:0 0 .35em;text-wrap:balance}
+  .tagline{margin:0;font-size:clamp(1rem,2vw,1.25rem);opacity:.9}
+  #splash-viz{width:100%;max-width:640px;min-height:220px}
+  .notify{width:100%;padding:1.6rem}
+  .notify h2{margin:0 0 1rem;font-size:clamp(1.15rem,2vw,1.4rem)}
+</style>

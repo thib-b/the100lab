@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-test('home shows album + bandcamp embed', async ({ page }) => {
-  await page.goto('/');
+test('lie shows album + bandcamp embed', async ({ page }) => {
+  await page.goto('/lie/');
   await expect(page.getByRole('heading', { name: "Living Isn't Easy" })).toBeVisible();
   await expect(page.locator('iframe[src*="bandcamp.com/EmbeddedPlayer"]')).toBeAttached();
 });
