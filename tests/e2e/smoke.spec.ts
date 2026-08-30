@@ -6,9 +6,11 @@ test('home renders nav with all sections', async ({ page }) => {
   }
   await expect(page.getByRole('link', { name: 'music', exact: true })).toHaveCount(0);
 });
-test('splash shows The Hundred and not the album page, /lie/ is reachable directly', async ({ page }) => {
+test('splash shows Hundred Pieces and not the album page, /lie/ is reachable directly', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'THE HUNDRED' })).toBeVisible();
+  // The visible title is grown by the canvas (decorative); the accessible heading carries the text.
+  await expect(page.getByRole('heading', { name: /hundred pieces/i })).toBeAttached();
+  await expect(page.getByText('Coming 2026')).toBeVisible();
   await expect(page.getByRole('heading', { name: "Living Isn't Easy" })).toHaveCount(0);
   await page.goto('/lie/');
   await expect(page.getByRole('heading', { name: "Living Isn't Easy" })).toBeVisible();

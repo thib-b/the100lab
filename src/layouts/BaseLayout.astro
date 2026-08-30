@@ -5,13 +5,47 @@ import Footer from '../components/Footer.astro';
 import GrowthGround from '../components/GrowthGround.astro';
 const { title } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/+$/, ''); // '' at root, '/the100lab' on Pages
+const description = 'Robocobra Quartet — Hundred Pieces. 100 pieces, coming 2026.';
+const ogImage = new URL(base + '/assets/images/og-cover.jpg', Astro.site).href;
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Pick the plate ground colour before first paint so there is no flash of the
+      // default turquoise while GrowthGround's module script (deferred) spins up.
+      // GrowthGround.astro reuses window.__groundHex so the canvas tint matches exactly.
+      // Palette/inkFor/scrimFor are small self-contained copies of src/data/palette.ts
+      // and src/lib/color.ts (kept in sync manually — this must stay inline + tiny).
+      (function () {
+        var palette = ['#17b6c9', '#f2c80f', '#e8743f', '#2f7fd0', '#9fb833', '#d15a86', '#8163a6', '#bd5230', '#c8347a'];
+        function relLum(hex) {
+          var h = hex.replace('#', '');
+          var c = [parseInt(h.slice(0, 2), 16) / 255, parseInt(h.slice(2, 4), 16) / 255, parseInt(h.slice(4, 6), 16) / 255];
+          var lin = c.map(function (s) { return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); });
+          return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+        }
+        function inkFor(hex) { return relLum(hex) > 0.42 ? '#141414' : '#f4f3ee'; }
+        function scrimFor(hex) { return relLum(hex) > 0.5 ? 'rgba(255,255,255,.34)' : 'rgba(0,0,0,.26)'; }
+        var hex = palette[Math.floor(Math.random() * palette.length)];
+        var ink = inkFor(hex);
+        var root = document.documentElement;
+        root.style.setProperty('--ground', hex);
+        root.style.setProperty('--ink', ink);
+        root.style.setProperty('--scrim', scrimFor(hex));
+        root.style.setProperty('--logo-invert', ink === '#141414' ? '0' : '1');
+        window.__groundHex = hex;
+      })();
+    </script>
     <title>{title} — Robocobra Quartet</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content="Hundred Pieces — Robocobra Quartet" />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href={base + '/favicon.svg'} />
     <ClientRouter />
   </head>

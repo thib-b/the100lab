@@ -2,35 +2,31 @@
 ---
 <div id="growth-ground" transition:persist aria-hidden="true"></div>
 <script>
-  import { hourlySeed, pickPlateColor, PLATE_PALETTE } from '../lib/seed';
-  import { inkFor, scrimFor } from '../lib/color';
   import { GrowthGround } from '../lib/growth';
 
-  // Current behaviour (intentional, keep until thib says otherwise): a random plate
-  // colour per page load, held stable across in-site navigation. This ships as-is,
-  // remote included. To switch to the deterministic hourly seed, swap the two lines
-  // below (use the hourly line instead of loadHex).
-  const loadHex = pickPlateColor(Math.floor(Math.random() * 1e6), PLATE_PALETTE).hex;
-  function applyGround() {
-    const hex = loadHex; // random per page load
-    // const { hex } = pickPlateColor(hourlySeed(), PLATE_PALETTE); // deterministic hourly seed
-    const root = document.documentElement;
-    root.style.setProperty('--ground', hex);
-    root.style.setProperty('--ink', inkFor(hex));
-    root.style.setProperty('--scrim', scrimFor(hex));
-    // Wordmark is solid black: invert it to white on dark grounds so it stays visible.
-    root.style.setProperty('--logo-invert', inkFor(hex) === '#141414' ? '0' : '1');
-    return hex;
-  }
-  const hex = applyGround();
+  const base = import.meta.env.BASE_URL.replace(/\/+$/, '');        // '' at root, '/the100lab' on Pages
+  const stampUrl = base + '/assets/images/hundred_pieces_stamp.png';
+  const el = document.getElementById('growth-ground')!;
   const w = window as any;
+
+  // The head inline script picks the ground colour before first paint and stores it here.
+  const groundHex = w.__groundHex
+    || getComputedStyle(document.documentElement).getPropertyValue('--ground').trim()
+    || '#17b6c9';
+
+  // Singleton: the growth medium is created once and survives view-transition navigation
+  // (the #growth-ground element is transition:persist, so the canvas node is never restarted).
   if (!w.__growth) {
-    const el = document.getElementById('growth-ground')!;
-    w.__growth = new GrowthGround(el, { groundHex: hex, intensity: 0.4 });
+    w.__growth = new GrowthGround(el, { groundHex });
     w.__growth.start();
   }
-  // Element persists across view transitions; re-assert CSS vars after each swap.
-  document.addEventListener('astro:after-swap', applyGround);
+
+  // The stamp reveal only runs on the splash ('/'); it's idempotent, so calling it again is safe.
+  function sync() {
+    if (location.pathname.replace(/\/+$/, '') === base) w.__growth.enableReveal(stampUrl);
+  }
+  sync();
+  document.addEventListener('astro:after-swap', sync);
 </script>
 <style is:global>
   #growth-ground{position:fixed;inset:0;z-index:0;pointer-events:none;}

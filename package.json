@@ -15,8 +15,7 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.8",
-    "astro": "^7.2.9",
-    "pixi.js": "^8.20.1"
+    "astro": "^7.2.9"
   },
   "allowScripts": {
     "esbuild": true

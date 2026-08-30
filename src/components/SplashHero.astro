@@ -1,25 +1,28 @@
 ---
-import MailchimpForm from './MailchimpForm.astro';
+// The visible title is grown by the GrowthGround canvas (the stamp reveal, upper-centre).
+// This splash uses a compact signup posting to the same Mailchimp list as /contact/ (which keeps
+// the full embedded form); keeping it slim leaves the centre clear for the reveal on short screens.
 ---
 <section class="splash">
-  <div class="intro scrim">
-    <p class="eyebrow">Robocobra Quartet</p>
-    <h1>THE HUNDRED</h1>
-    <p class="tagline">100 tracks · coming 2026</p>
-  </div>
-  <div id="splash-viz" aria-hidden="true"><!-- MVP2 Batch 2: original hero visualization mounts here --></div>
+  <h1 class="sr-only">Robocobra Quartet — Hundred Pieces</h1>
   <div class="notify scrim">
-    <h2>Be the first to hear it.</h2>
-    <MailchimpForm />
+    <p class="eyebrow">Coming 2026</p>
+    <form class="signup" action="https://bandcamp.us2.list-manage.com/subscribe/post?u=1c7ba3baf4edb8e5f8f070e0e&amp;id=fd06c37a76&amp;f_id=007850e0f0" method="post" target="_blank">
+      <input type="email" name="EMAIL" required placeholder="Email address" aria-label="Email address" />
+      <div aria-hidden="true" style="position:absolute;left:-5000px"><input type="text" name="b_1c7ba3baf4edb8e5f8f070e0e_fd06c37a76" tabindex="-1" value="" /></div>
+      <button type="submit">Notify me</button>
+    </form>
   </div>
 </section>
 <style>
-  .splash{max-width:900px;margin:0 auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2rem}
-  .intro{padding:2rem 1.6rem}
-  .eyebrow{margin:0 0 .4em;text-transform:uppercase;letter-spacing:.16em;font-size:.85rem;opacity:.85}
-  h1{font-size:clamp(2.6rem,8vw,5.5rem);line-height:1;letter-spacing:-.02em;margin:0 0 .35em;text-wrap:balance}
-  .tagline{margin:0;font-size:clamp(1rem,2vw,1.25rem);opacity:.9}
-  #splash-viz{width:100%;max-width:640px;min-height:220px}
-  .notify{width:100%;padding:1.6rem}
-  .notify h2{margin:0 0 1rem;font-size:clamp(1.15rem,2vw,1.4rem)}
+  .splash{min-height:calc(100vh - 130px);display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .notify{width:100%;max-width:460px;padding:1rem 1.2rem;text-align:center}
+  .eyebrow{margin:0 0 .8em;text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;opacity:.9}
+  .signup{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+  .signup input[type=email]{flex:1 1 210px;min-width:0;padding:.62rem .85rem;border-radius:9px;
+    border:1px solid rgba(0,0,0,.18);background:rgba(255,255,255,.94);color:#141414;font:inherit}
+  .signup button{padding:.62rem 1.15rem;border-radius:9px;border:1px solid var(--ink);
+    background:var(--ink);color:var(--ground);cursor:pointer;font:inherit;font-weight:600;transition:opacity .15s}
+  .signup button:hover{opacity:.85}
 </style>
