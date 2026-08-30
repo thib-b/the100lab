@@ -1,18 +1,23 @@
 ---
 title: image
 ---
+export const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
-![Robocobra Quartet Press Shot 1](/assets/images/RQ1.jpeg)
-Press Shot ([Click here for hi-res download](/assets/images/RQ1.jpeg))  
+<img src={base + "/assets/images/RQ1.jpeg"} alt="Robocobra Quartet Press Shot 1" />
+
+Press Shot (<a href={base + "/assets/images/RQ1.jpeg"}>Click here for hi-res download</a>)<br/>
 Photo credit: Colin Armstrong
 
-![Robocobra Quartet Press Shot 2](/assets/images/RQ2.jpeg)
-Press Shot ([Click here for hi-res download](/assets/images/RQ2.jpeg))  
+<img src={base + "/assets/images/RQ2.jpeg"} alt="Robocobra Quartet Press Shot 2" />
+
+Press Shot (<a href={base + "/assets/images/RQ2.jpeg"}>Click here for hi-res download</a>)<br/>
 Photo credit: Colin Armstrong
 
-![Robocobra Quartet Press Shot 3](/assets/images/RQ3.jpeg)
-Press Shot ([Click here for hi-res download](/assets/images/RQ3.jpeg))  
+<img src={base + "/assets/images/RQ3.jpeg"} alt="Robocobra Quartet Press Shot 3" />
+
+Press Shot (<a href={base + "/assets/images/RQ3.jpeg"}>Click here for hi-res download</a>)<br/>
 Photo credit: Colin Armstrong
 
-![Logo](/assets/images/rqlogo.png)
-Logo ([Click here for hi-res download](/assets/images/rqlogo.png))  
+<img src={base + "/assets/images/rqlogo.png"} alt="Robocobra Quartet logo" />
+
+Logo (<a href={base + "/assets/images/rqlogo.png"}>Click here for hi-res download</a>)

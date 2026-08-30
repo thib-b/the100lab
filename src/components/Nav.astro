@@ -1,13 +1,14 @@
 ---
 import { NAV } from '../data/nav';
+const base = import.meta.env.BASE_URL.replace(/\/+$/, ''); // '' at root, '/the100lab' on Pages
 ---
 <nav aria-label="Primary">
-  <a class="brand" href="/"><img src="/assets/images/rqlogo.png" alt="Robocobra Quartet" /></a>
+  <a class="brand" href={base + '/'}><img src={base + '/assets/images/rqlogo.png'} alt="Robocobra Quartet" /></a>
   <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Toggle menu" />
   <label for="nav-toggle" class="burger" aria-hidden="true"><span></span></label>
   <ul>
     {NAV.map((n) => (
-      <li><a href={n.url} {...(n.external ? { target: '_blank', rel: 'noopener' } : {})}>{n.title}</a></li>
+      <li><a href={n.external ? n.url : base + n.url} {...(n.external ? { target: '_blank', rel: 'noopener' } : {})}>{n.title}</a></li>
     ))}
   </ul>
 </nav>
