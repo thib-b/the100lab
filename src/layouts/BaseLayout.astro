@@ -61,7 +61,10 @@ const ogImage = new URL(base + '/assets/images/og-cover.jpg', Astro.site).href;
     </div>
     <style is:global>
       :root{ --ground:#17b6c9; --ink:#f4f3ee; --scrim:rgba(0,0,0,.26); --logo-invert:0;
-        --sans:"Helvetica Neue",Helvetica,Arial,system-ui,sans-serif; }
+        /* Helvetica Neue on Apple devices; metric-compatible fallbacks elsewhere
+           (Arial on Windows, Liberation Sans/Nimbus/Roboto on Linux/Android). Not self-hosted
+           — the band has no licence to embed Helvetica Neue. */
+        --sans:"Helvetica Neue",Helvetica,Arial,"Liberation Sans","Nimbus Sans",Roboto,system-ui,sans-serif; }
       *{box-sizing:border-box}
       html,body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55}
       .shell{max-width:1000px;margin:0 auto;padding:0 clamp(18px,4vw,40px) 72px;position:relative;z-index:1}
