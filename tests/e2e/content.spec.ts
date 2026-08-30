@@ -8,9 +8,9 @@ test('bio shows the pull quote', async ({ page }) => {
   await page.goto('/bio/');
   await expect(page.getByText('Free-floating musical explorers')).toBeVisible();
 });
-test('video shows four youtube embeds', async ({ page }) => {
+test('video shows five youtube embeds', async ({ page }) => {
   await page.goto('/video/');
-  await expect(page.locator('iframe[src*="youtube.com/embed"]')).toHaveCount(4);
+  await expect(page.locator('iframe[src*="youtube.com/embed"]')).toHaveCount(5);
 });
 test('image press shots load', async ({ page }) => {
   await page.goto('/image/');
