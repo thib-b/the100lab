@@ -21,6 +21,11 @@ test('tour mounts the songkick widget', async ({ page }) => {
   await page.goto('/tour/');
   await expect(page.locator('#songkick-widget-8269433-3837')).toBeAttached();
 });
+test('tour lists past tour dates', async ({ page }) => {
+  await page.goto('/tour/');
+  await expect(page.getByRole('heading', { name: 'Past Tour Dates' })).toBeVisible();
+  await expect(page.getByText('Glastonbury Festival')).toBeVisible();
+});
 test('contact shows emails and mailchimp form', async ({ page }) => {
   await page.goto('/contact/');
   await expect(page.getByRole('link', { name: 'robocobraquartet@gmail.com' })).toBeVisible();
