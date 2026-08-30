@@ -2,7 +2,9 @@
 import { NAV } from '../data/nav';
 ---
 <nav aria-label="Primary">
-  <a class="brand" href="/">Robocobra Quartet</a>
+  <a class="brand" href="/"><img src="/assets/images/rqlogo.png" alt="Robocobra Quartet" /></a>
+  <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Toggle menu" />
+  <label for="nav-toggle" class="burger" aria-hidden="true"><span></span></label>
   <ul>
     {NAV.map((n) => (
       <li><a href={n.url} {...(n.external ? { target: '_blank', rel: 'noopener' } : {})}>{n.title}</a></li>
@@ -10,9 +12,26 @@ import { NAV } from '../data/nav';
   </ul>
 </nav>
 <style>
-  nav{display:flex;gap:1.5rem;align-items:baseline;flex-wrap:wrap;padding:1.2rem 0}
-  .brand{font-weight:800;letter-spacing:-.01em;margin-right:auto;text-decoration:none;color:var(--ink)}
+  nav{display:flex;align-items:center;gap:1.25rem;padding:1.1rem 0;position:relative}
+  .brand{margin-right:auto;display:inline-flex;text-decoration:none}
+  .brand img{height:40px;width:auto;display:block;filter:invert(var(--logo-invert,0))}
   ul{display:flex;gap:1.1rem;list-style:none;margin:0;padding:0;flex-wrap:wrap}
-  a{color:var(--ink);text-decoration:none;text-transform:uppercase;letter-spacing:.06em;font-size:.82rem;font-weight:600}
-  a:hover,a:focus-visible{text-decoration:underline}
+  ul a{color:var(--ink);text-decoration:none;text-transform:uppercase;letter-spacing:.06em;font-size:.82rem;font-weight:600}
+  ul a:hover,ul a:focus-visible{text-decoration:underline}
+  .nav-toggle,.burger{display:none}
+  @media (max-width:720px){
+    /* invisible checkbox sits over the burger and drives the CSS-only toggle */
+    .nav-toggle{display:block;position:absolute;top:.55rem;right:-4px;width:44px;height:44px;margin:0;opacity:0;cursor:pointer;z-index:6}
+    .burger{display:block;width:26px;height:18px;position:relative;color:var(--ink)}
+    .burger span,.burger span::before,.burger span::after{content:"";position:absolute;left:0;right:0;height:2px;background:currentColor;border-radius:2px;transition:transform .2s,opacity .2s}
+    .burger span{top:8px}
+    .burger span::before{top:-7px}
+    .burger span::after{top:7px}
+    ul{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:var(--scrim);backdrop-filter:blur(8px);border-radius:12px;padding:.4rem;margin-top:.5rem;z-index:5}
+    ul a{display:block;padding:.7rem 1rem;font-size:.95rem}
+    .nav-toggle:checked ~ ul{display:flex}
+    .nav-toggle:checked ~ .burger span{background:transparent}
+    .nav-toggle:checked ~ .burger span::before{transform:translateY(7px) rotate(45deg)}
+    .nav-toggle:checked ~ .burger span::after{transform:translateY(-7px) rotate(-45deg)}
+  }
 </style>

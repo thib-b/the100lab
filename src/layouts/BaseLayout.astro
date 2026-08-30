@@ -11,6 +11,7 @@ const { title } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} — Robocobra Quartet</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <ClientRouter />
   </head>
   <body>
@@ -21,18 +22,26 @@ const { title } = Astro.props;
       <Footer />
     </div>
     <style is:global>
-      :root{ --ground:#17b6c9; --ink:#f4f3ee; --scrim:rgba(0,0,0,.26);
+      :root{ --ground:#17b6c9; --ink:#f4f3ee; --scrim:rgba(0,0,0,.26); --logo-invert:0;
         --sans:"Helvetica Neue",Helvetica,Arial,system-ui,sans-serif; }
       *{box-sizing:border-box}
-      html,body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.55}
-      .shell{max-width:960px;margin:0 auto;padding:0 clamp(16px,4vw,32px) 64px;position:relative;z-index:1}
+      html,body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55}
+      .shell{max-width:1000px;margin:0 auto;padding:0 clamp(18px,4vw,40px) 72px;position:relative;z-index:1}
       main :is(h1,h2){letter-spacing:-.02em;text-wrap:balance}
+      main h1{font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.03;margin:.2em 0 .45em}
+      main h2{font-size:clamp(1.35rem,2.4vw,1.85rem)}
       a{color:var(--ink)}
-      .prose{max-width:65ch}
+      /* centered content column (like robocobraquartet.com); media fills the column */
+      .prose{max-width:900px;margin:0 auto;text-align:center}
+      .prose p{max-width:64ch;margin-left:auto;margin-right:auto}
+      .prose p:has(img){max-width:none}
+      main img{max-width:100%;height:auto;display:block;margin:1.25rem auto;border-radius:8px}
       /* body copy sits on the legibility scrim on the seeded ground */
-      .scrim{background:var(--scrim);backdrop-filter:blur(4px);border-radius:12px;padding:1rem 1.25rem}
-      .embed-responsive{position:relative;width:100%;aspect-ratio:16/9;margin:1rem 0}
+      .scrim{background:var(--scrim);backdrop-filter:blur(4px);border-radius:14px;padding:1.4rem 1.6rem}
+      .embed-responsive{position:relative;width:100%;aspect-ratio:16/9;margin:1rem auto}
       .embed-responsive iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+      /* keep fixed-size embeds (e.g. the 350px Bandcamp player) inside the column, centered */
+      .prose iframe{max-width:100%;display:block;margin-left:auto;margin-right:auto}
     </style>
   </body>
 </html>

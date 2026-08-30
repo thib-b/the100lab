@@ -6,12 +6,20 @@
   import { inkFor, scrimFor } from '../lib/color';
   import { GrowthGround } from '../lib/growth';
 
+  // Current behaviour (intentional, keep until thib says otherwise): a random plate
+  // colour per page load, held stable across in-site navigation. This ships as-is,
+  // remote included. To switch to the deterministic hourly seed, swap the two lines
+  // below (use the hourly line instead of loadHex).
+  const loadHex = pickPlateColor(Math.floor(Math.random() * 1e6), PLATE_PALETTE).hex;
   function applyGround() {
-    const { hex } = pickPlateColor(hourlySeed(), PLATE_PALETTE);
+    const hex = loadHex; // random per page load
+    // const { hex } = pickPlateColor(hourlySeed(), PLATE_PALETTE); // deterministic hourly seed
     const root = document.documentElement;
     root.style.setProperty('--ground', hex);
     root.style.setProperty('--ink', inkFor(hex));
     root.style.setProperty('--scrim', scrimFor(hex));
+    // Wordmark is solid black: invert it to white on dark grounds so it stays visible.
+    root.style.setProperty('--logo-invert', inkFor(hex) === '#141414' ? '0' : '1');
     return hex;
   }
   const hex = applyGround();
