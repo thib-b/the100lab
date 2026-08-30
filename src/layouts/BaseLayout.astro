@@ -29,7 +29,10 @@ const ogImage = new URL(base + '/assets/images/og-cover.jpg', Astro.site).href;
         }
         function inkFor(hex) { return relLum(hex) > 0.42 ? '#141414' : '#f4f3ee'; }
         function scrimFor(hex) { return relLum(hex) > 0.5 ? 'rgba(255,255,255,.34)' : 'rgba(0,0,0,.26)'; }
-        var hex = palette[Math.floor(Math.random() * palette.length)];
+        // Pick once per full page load and reuse across view-transition navigations
+        // (this script re-runs on each swap; without this the ground — and the invert-driven
+        // logo — would reseed to a new colour on every click).
+        var hex = window.__groundHex || palette[Math.floor(Math.random() * palette.length)];
         var ink = inkFor(hex);
         var root = document.documentElement;
         root.style.setProperty('--ground', hex);

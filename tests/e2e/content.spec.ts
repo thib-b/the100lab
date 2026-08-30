@@ -19,7 +19,7 @@ test('image press shots load', async ({ page }) => {
 });
 test('tour mounts the songkick widget', async ({ page }) => {
   await page.goto('/tour/');
-  await expect(page.locator('#songkick-widget-8269433-3837')).toBeAttached();
+  await expect(page.locator('#songkick-embed')).toBeAttached();
 });
 test('tour lists past tour dates', async ({ page }) => {
   await page.goto('/tour/');

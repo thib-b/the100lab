@@ -3,6 +3,7 @@
 <div id="growth-ground" transition:persist aria-hidden="true"></div>
 <script>
   import { GrowthGround } from '../lib/growth';
+  import { inkFor, scrimFor } from '../lib/color';
 
   const base = import.meta.env.BASE_URL.replace(/\/+$/, '');        // '' at root, '/the100lab' on Pages
   const stampUrl = base + '/assets/images/hundred_pieces_stamp.png';
@@ -13,6 +14,22 @@
   const groundHex = w.__groundHex
     || getComputedStyle(document.documentElement).getPropertyValue('--ground').trim()
     || '#17b6c9';
+  w.__groundHex = groundHex;
+
+  // Astro resets the <html> inline style on view-transition swaps, so re-apply the seeded
+  // ground vars after every navigation — otherwise --ground reverts to the CSS default and the
+  // invert-driven logo flips colour on each click.
+  function applyGroundVars() {
+    const hex = w.__groundHex;
+    if (!hex) return;
+    const ink = inkFor(hex);
+    const s = document.documentElement.style;
+    s.setProperty('--ground', hex);
+    s.setProperty('--ink', ink);
+    s.setProperty('--scrim', scrimFor(hex));
+    s.setProperty('--logo-invert', ink === '#141414' ? '0' : '1');
+  }
+  applyGroundVars();
 
   // Singleton: the growth medium is created once and survives view-transition navigation
   // (the #growth-ground element is transition:persist, so the canvas node is never restarted).
@@ -26,7 +43,7 @@
     if (location.pathname.replace(/\/+$/, '') === base) w.__growth.enableReveal(stampUrl);
   }
   sync();
-  document.addEventListener('astro:after-swap', sync);
+  document.addEventListener('astro:after-swap', () => { applyGroundVars(); sync(); });
 </script>
 <style is:global>
   #growth-ground{position:fixed;inset:0;z-index:0;pointer-events:none;}

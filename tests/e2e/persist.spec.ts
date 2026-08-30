@@ -12,7 +12,7 @@ test('songkick widget mounts after client-side nav to /tour/', async ({ page }) 
   await page.goto('/');
   await page.getByRole('link', { name: 'tour', exact: true }).click();
   await expect(page).toHaveURL(/\/tour\/?$/);
-  await expect(page.locator('#songkick-widget-8269433-3837')).toBeAttached();
+  await expect(page.locator('#songkick-embed')).toBeAttached();
 });
 
 test('mailchimp form mounts after client-side nav to /contact/', async ({ page }) => {

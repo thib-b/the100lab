@@ -1,4 +1,15 @@
 ---
 ---
-<iframe id="songkick-widget-8269433-3837" title="Tour dates" style="height:420px;width:100%;border:0" frameborder="0" allow="clipboard-write" src="https://widget-app.songkick.com/?artist=8269433&header=&background-color=transparent&font-color=%23000000&locale=en&other-artists=on&theme=dark"></iframe>
+<!-- Official Songkick embed: widget.js replaces the anchor with an iframe and auto-resizes it
+     to fit its content (via postMessage), so the height tracks the actual number of dates
+     instead of a fixed guess. The #songkick-embed wrapper is a stable hook for tests/styling. -->
+<div id="songkick-embed">
+  <a href="https://www.songkick.com/artists/8269433" class="songkick-widget"
+     data-theme="dark" data-detect-style="true" data-background-color="transparent"
+     data-font-color="#000000" data-locale="en" data-other-artists="on">Robocobra Quartet tour dates</a>
+</div>
 <script is:inline data-astro-rerun src="https://widget.songkick.com/8269433/widget.js"></script>
+<style>
+  /* reserve a little space before widget.js swaps in the iframe, to reduce layout shift */
+  #songkick-embed{min-height:120px}
+</style>
