@@ -58,7 +58,7 @@ export class GrowthGround {
   private revealRequested = false; private maskReady = false;
   private stamp?: HTMLImageElement; private maskImg?: Uint8ClampedArray;
   private edgePts: { x: number; y: number }[] = [];
-  private cxc = 0; private cyc = 0; private nogoR = 0;
+  private cxc = 0; private cyc = 0; private nogoR = 0; private stampSize = 0;
 
   constructor(private el: HTMLElement, opts: { groundHex: string }) {
     this.ink = inkFor(opts.groundHex);
@@ -120,7 +120,11 @@ export class GrowthGround {
     if (!this.stamp) return;
     this.mk.width = this.W * this.dpr; this.mk.height = this.H * this.dpr;
     this.mx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0); this.mx.clearRect(0, 0, this.W, this.H);
-    const size = Math.min(this.W, this.H) * 0.44, ox = this.cxc - size / 2, oy = this.cyc - size / 2;
+    // Size the stamp off the vertical space (a bit under half the height), capped by width so it
+    // never overflows a narrow/portrait screen. Keeps desktop ~the same while making mobile bigger.
+    const size = Math.min(this.H * 0.44, this.W * 0.80);
+    this.stampSize = size;
+    const ox = this.cxc - size / 2, oy = this.cyc - size / 2;
     this.mx.drawImage(this.stamp, ox, oy, size, size);
     this.maskImg = this.mx.getImageData(0, 0, this.W * this.dpr, this.H * this.dpr).data;
     this.nogoR = size * 0.72;   // fully enclose the stamp square (half-diagonal ~0.707) so no colony spawns over the reveal
@@ -181,7 +185,7 @@ export class GrowthGround {
     this.tips.push({ col: this.ink, x: p.x, y: p.y, ang: rnd(6.2832), life: rnd(70, 35), w: rnd(0.85, 0.45) });
   }
   private stepVeins() {
-    const sp = 0.42 * (Math.min(this.W, this.H) / 760);
+    const sp = this.stampSize * 0.00126;   // crawl speed tracks the stamp size, so the reveal grows at a consistent rate on any screen
     const sTarget = Math.round(this.edgePts.length * 1.15 * this.g); // fill tracks the shared clock
     while (this.seededTips < sTarget) { this.seedStamp(); this.seededTips++; }
     this.ac.lineCap = 'round';
