@@ -7,7 +7,7 @@ import { inkFor } from './color';
 // Growth is additive and drawn incrementally onto persistent canvases (never cleared/re-blitted),
 // and the animation loop stops entirely once everything has finished growing (~0 CPU at rest).
 
-type Tip = { x: number; y: number; ang: number; len: number; maxLen: number; w0: number; sp: number; col: string; gen: number };
+type Tip = { x: number; y: number; ang: number; len: number; maxLen: number; w0: number; sp: number; col: string; gen: number; delay: number };
 type Vein = { x: number; y: number; ang: number; life: number; w: number };
 
 const WHITES = ['#f4f3ee', '#eae6da', '#f2eee6'];
@@ -23,31 +23,14 @@ const BLOOM_THICK = 0.5;          // filament thickness multiplier  (Thick ~0.4)
 // Filament extension pace — lower = slower grow-in. Decoupled from the *shape*: wander and branch
 // rate are rescaled off this so a bloom's final curliness/density stays constant as the pace changes.
 // 0.55 grew a bloom in ~3s; 0.16 stretches it to ~10s to sit closer to the stamp's reveal pace.
-const BLOOM_GROW = 0.16;
+const BLOOM_GROW = 0.08;
 const _PACE_R = BLOOM_GROW / 0.55;                 // ratio vs the reference (0.55) look
 const BLOOM_WANDER = 0.62 * Math.sqrt(_PACE_R);    // ∝ √step  → same path curliness at any pace
 const BLOOM_BRANCH = 0.09 * _PACE_R;               // ∝ step   → same branches-per-length at any pace
+const BLOOM_STAGGER = 60;                          // frames (~1s) each burst in a cluster waits before starting
 
 const rnd = (a = 1, b = 0) => b + Math.random() * (a - b);
 const pick = <T>(a: T[]): T => a[(Math.random() * a.length) | 0];
-
-// soft core sprite (white, tinted per bloom) — drawn once per burst
-const CS = 96, softCore = document.createElement('canvas');
-softCore.width = softCore.height = CS;
-{
-  const x = softCore.getContext('2d')!;
-  const g = x.createRadialGradient(CS / 2, CS / 2, 0, CS / 2, CS / 2, CS / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.45, 'rgba(255,255,255,0.5)'); g.addColorStop(1, 'rgba(255,255,255,0)');
-  x.fillStyle = g; x.fillRect(0, 0, CS, CS);
-}
-const coreCache = new Map<string, HTMLCanvasElement>();
-function tintedCore(col: string): HTMLCanvasElement {
-  let c = coreCache.get(col); if (c) return c;
-  c = document.createElement('canvas'); c.width = c.height = CS;
-  const x = c.getContext('2d')!;
-  x.drawImage(softCore, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = col; x.fillRect(0, 0, CS, CS);
-  coreCache.set(col, c); return c;
-}
 
 export class GrowthGround {
   private blooms = document.createElement('canvas');   // low-res, CSS-blurred
@@ -166,17 +149,18 @@ export class GrowthGround {
     const base = Math.min(this.W, this.H) / 760;
     const size = Math.min(this.W, this.H) * rnd(0.15, 0.07) * BLOOM_SIZE, bursts = 2 + ((Math.random() * 3) | 0), spd = rnd(1.25, 0.7);
     for (let b = 0; b < bursts; b++) {
-      const off = size * 0.30, cx = bx + rnd(off, -off), cy = by + rnd(off, -off), cr = size * rnd(0.34, 0.2);
-      this.bc.globalAlpha = 0.42; this.bc.drawImage(tintedCore(col), cx - cr, cy - cr, cr * 2, cr * 2); this.bc.globalAlpha = 1;
+      const off = size * 0.30, cx = bx + rnd(off, -off), cy = by + rnd(off, -off);
+      const bDelay = b * BLOOM_STAGGER + rnd(24, -24);   // cascade bursts ~1s apart (+ jitter)
       const T = Math.round(rnd(26, 16)), rot = rnd(6.2832);
       for (let i = 0; i < T; i++) {
         const ang = rot + (i / T) * 6.2832 + rnd(0.6, -0.6);
-        this.tips.push({ x: cx, y: cy, ang, len: 0, maxLen: size * rnd(1.15, 0.5), w0: rnd(2.6, 1.2) * BLOOM_THICK * base, sp: rnd(1.3, 0.7) * spd * BLOOM_GROW * base, col, gen: 0 });
+        this.tips.push({ x: cx, y: cy, ang, len: 0, maxLen: size * rnd(1.15, 0.5), w0: rnd(2.6, 1.2) * BLOOM_THICK * base, sp: rnd(1.3, 0.7) * spd * BLOOM_GROW * base, col, gen: 0, delay: Math.max(0, bDelay + rnd(12, 0)) });
       }
     }
     this.bloomsSpawned++;
   }
   private stepBloomTip(t: Tip): boolean {
+    if (t.delay > 0) { t.delay--; return true; }   // staggered start — wait, stay active
     const prog = t.len / t.maxLen;
     t.ang += rnd(BLOOM_WANDER, -BLOOM_WANDER);
     const sp = t.sp;
@@ -186,7 +170,7 @@ export class GrowthGround {
     this.bc.beginPath(); this.bc.moveTo(t.x, t.y); this.bc.lineTo(nx, ny); this.bc.stroke();
     t.x = nx; t.y = ny; t.len += sp;
     if (Math.random() < BLOOM_BRANCH && t.gen < 3 && this.tips.length < 6000)
-      this.tips.push({ x: t.x, y: t.y, ang: t.ang + rnd(1.1, .5) * (Math.random() < .5 ? 1 : -1), len: 0, maxLen: (t.maxLen - t.len) * rnd(0.7, 0.35), w0: Math.max(0.5, t.w0 * 0.72), sp: t.sp, col: t.col, gen: t.gen + 1 });
+      this.tips.push({ x: t.x, y: t.y, ang: t.ang + rnd(1.1, .5) * (Math.random() < .5 ? 1 : -1), len: 0, maxLen: (t.maxLen - t.len) * rnd(0.7, 0.35), w0: Math.max(0.5, t.w0 * 0.72), sp: t.sp, col: t.col, gen: t.gen + 1, delay: 0 });
     const out = t.x < -30 || t.y < -30 || t.x > this.W + 30 || t.y > this.H + 30;
     return !(t.len >= t.maxLen || out);
   }
@@ -248,7 +232,7 @@ export class GrowthGround {
   private trySettle() {
     if (this.revealRequested && !this.maskReady) return;
     this.pendingSettle = false; this.g = 1; this.age = DUR;
-    for (let k = 0; k < 12000 && !this.settled(); k++) {
+    for (let k = 0; k < 24000 && !this.settled(); k++) {
       if (this.bloomsSpawned < this.bloomTarget() && Math.random() < 0.5) this.spawnBloom();
       for (let i = this.tips.length - 1; i >= 0; i--) if (!this.stepBloomTip(this.tips[i])) this.tips.splice(i, 1);
       if (this.maskReady) this.stepVeins();
