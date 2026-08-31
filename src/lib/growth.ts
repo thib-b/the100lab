@@ -16,6 +16,7 @@ const DUR = 4200;                 // frames for the plate to fully colonise (~70
 
 // --- bloom look (tuned with thib; slider estimates on a 0..1 scale) ---
 const BLOOM_BLUR_PX = 0.5;        // CSS blur on the blooms layer   (Blur ~0.15)
+const STAMP_BLUR_PX = 0.5;        // CSS blur on the stamp layer to match the blooms' softness (0 = crisp)
 const BLOOM_COVER = 0.8;          // density of blooms              (Cover ~0.8)
 const BLOOM_SIZE = 0.6;           // bloom reach multiplier         (Size ~0.15)
 const BLOOM_THICK = 0.5;          // filament thickness multiplier  (Thick ~0.4)
@@ -73,6 +74,7 @@ export class GrowthGround {
     this.ink = inkFor(opts.groundHex);
     for (const c of [this.blooms, this.stamp]) c.setAttribute('aria-hidden', 'true');
     this.blooms.style.filter = `blur(${BLOOM_BLUR_PX}px)`;
+    if (STAMP_BLUR_PX > 0) this.stamp.style.filter = `blur(${STAMP_BLUR_PX}px)`;
     this.el.appendChild(this.blooms);   // blooms below
     this.el.appendChild(this.stamp);    // stamp on top (crisp)
   }
