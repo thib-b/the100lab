@@ -19,7 +19,13 @@ const BLOOM_BLUR_PX = 0.5;        // CSS blur on the blooms layer   (Blur ~0.15)
 const BLOOM_COVER = 0.8;          // density of blooms              (Cover ~0.8)
 const BLOOM_SIZE = 0.6;           // bloom reach multiplier         (Size ~0.15)
 const BLOOM_THICK = 0.5;          // filament thickness multiplier  (Thick ~0.4)
-const BLOOM_SPEED = 0.55;         // filament extension multiplier  (Speed ~0.2)
+// Filament extension pace — lower = slower grow-in. Decoupled from the *shape*: wander and branch
+// rate are rescaled off this so a bloom's final curliness/density stays constant as the pace changes.
+// 0.55 grew a bloom in ~3s; 0.16 stretches it to ~10s to sit closer to the stamp's reveal pace.
+const BLOOM_GROW = 0.16;
+const _PACE_R = BLOOM_GROW / 0.55;                 // ratio vs the reference (0.55) look
+const BLOOM_WANDER = 0.62 * Math.sqrt(_PACE_R);    // ∝ √step  → same path curliness at any pace
+const BLOOM_BRANCH = 0.09 * _PACE_R;               // ∝ step   → same branches-per-length at any pace
 
 const rnd = (a = 1, b = 0) => b + Math.random() * (a - b);
 const pick = <T>(a: T[]): T => a[(Math.random() * a.length) | 0];
@@ -163,21 +169,21 @@ export class GrowthGround {
       const T = Math.round(rnd(26, 16)), rot = rnd(6.2832);
       for (let i = 0; i < T; i++) {
         const ang = rot + (i / T) * 6.2832 + rnd(0.6, -0.6);
-        this.tips.push({ x: cx, y: cy, ang, len: 0, maxLen: size * rnd(1.15, 0.5), w0: rnd(2.6, 1.2) * BLOOM_THICK * base, sp: rnd(1.3, 0.7) * spd * BLOOM_SPEED * base, col, gen: 0 });
+        this.tips.push({ x: cx, y: cy, ang, len: 0, maxLen: size * rnd(1.15, 0.5), w0: rnd(2.6, 1.2) * BLOOM_THICK * base, sp: rnd(1.3, 0.7) * spd * BLOOM_GROW * base, col, gen: 0 });
       }
     }
     this.bloomsSpawned++;
   }
   private stepBloomTip(t: Tip): boolean {
     const prog = t.len / t.maxLen;
-    t.ang += rnd(0.62, -0.62);
-    const sp = t.sp * (0.45 + 0.55 * Math.min(1, prog * 3));
+    t.ang += rnd(BLOOM_WANDER, -BLOOM_WANDER);
+    const sp = t.sp;
     const nx = t.x + Math.cos(t.ang) * sp, ny = t.y + Math.sin(t.ang) * sp;
     const w = Math.max(0.35, t.w0 * (1 - 0.84 * prog));
     this.bc.strokeStyle = t.col; this.bc.globalAlpha = t.gen === 0 ? 0.5 : 0.4; this.bc.lineWidth = w;
     this.bc.beginPath(); this.bc.moveTo(t.x, t.y); this.bc.lineTo(nx, ny); this.bc.stroke();
     t.x = nx; t.y = ny; t.len += sp;
-    if (Math.random() < 0.09 && t.gen < 3 && this.tips.length < 6000)
+    if (Math.random() < BLOOM_BRANCH && t.gen < 3 && this.tips.length < 6000)
       this.tips.push({ x: t.x, y: t.y, ang: t.ang + rnd(1.1, .5) * (Math.random() < .5 ? 1 : -1), len: 0, maxLen: (t.maxLen - t.len) * rnd(0.7, 0.35), w0: Math.max(0.5, t.w0 * 0.72), sp: t.sp, col: t.col, gen: t.gen + 1 });
     const out = t.x < -30 || t.y < -30 || t.x > this.W + 30 || t.y > this.H + 30;
     return !(t.len >= t.maxLen || out);
@@ -240,7 +246,7 @@ export class GrowthGround {
   private trySettle() {
     if (this.revealRequested && !this.maskReady) return;
     this.pendingSettle = false; this.g = 1; this.age = DUR;
-    for (let k = 0; k < 4200 && !this.settled(); k++) {
+    for (let k = 0; k < 12000 && !this.settled(); k++) {
       if (this.bloomsSpawned < this.bloomTarget() && Math.random() < 0.5) this.spawnBloom();
       for (let i = this.tips.length - 1; i >= 0; i--) if (!this.stepBloomTip(this.tips[i])) this.tips.splice(i, 1);
       if (this.maskReady) this.stepVeins();
