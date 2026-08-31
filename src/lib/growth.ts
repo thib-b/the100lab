@@ -66,11 +66,12 @@ export class GrowthGround {
     if (this.running && !this.reduced) return;
     this.size();
     addEventListener('resize', this.onResize);
+    addEventListener('click', this.onClick);
     document.addEventListener('visibilitychange', this.onVis);
     if (this.reduced) { this.pendingSettle = true; queueMicrotask(() => this.trySettle()); return; }
     this.kick();
   }
-  stop() { this.running = false; cancelAnimationFrame(this.raf); removeEventListener('resize', this.onResize); document.removeEventListener('visibilitychange', this.onVis); }
+  stop() { this.running = false; cancelAnimationFrame(this.raf); removeEventListener('resize', this.onResize); removeEventListener('click', this.onClick); document.removeEventListener('visibilitychange', this.onVis); }
 
   enableReveal(stampUrl: string) {
     if (this.revealRequested) return;
@@ -141,10 +142,14 @@ export class GrowthGround {
 
   // ---------- blooms: tight cluster of bursts, dense soft core -> branching filaments ----------
   private bloomTarget() { return Math.round(this.W * this.H / 62000 * (0.3 + BLOOM_COVER)); }
-  private spawnBloom() {
-    let bx = 0, by = 0, tries = 0;
-    do { bx = rnd(this.W); by = rnd(this.H); tries++; } while (this.inNoGo(bx, by) && tries < 12);
-    if (this.inNoGo(bx, by)) return;
+  private spawnBloom(px?: number, py?: number) {
+    let bx = 0, by = 0;
+    if (px !== undefined && py !== undefined) { bx = px; by = py; }   // click/tap: honour the exact spot
+    else {
+      let tries = 0;
+      do { bx = rnd(this.W); by = rnd(this.H); tries++; } while (this.inNoGo(bx, by) && tries < 12);
+      if (this.inNoGo(bx, by)) return;
+    }
     const col = Math.random() < 0.5 ? pick(WHITES) : pick(DARKS);
     const base = Math.min(this.W, this.H) / 760;
     const size = Math.min(this.W, this.H) * rnd(0.15, 0.07) * BLOOM_SIZE, bursts = 2 + ((Math.random() * 3) | 0), spd = rnd(1.25, 0.7);
@@ -159,6 +164,18 @@ export class GrowthGround {
     }
     this.bloomsSpawned++;
   }
+  // Click/tap the background → grow a bloom at that spot. Ignore clicks on interactive UI so
+  // links, the form and the tour widget still work normally.
+  private onClick = (e: MouseEvent) => {
+    const t = e.target as Element | null;
+    if (t && t.closest('a, button, input, textarea, select, label, [role="button"], iframe, form')) return;
+    this.spawnBloom(e.clientX, e.clientY);
+    if (this.reduced) {   // reduced-motion: draw it in without animating
+      for (let k = 0; k < 4000 && this.tips.length; k++)
+        for (let i = this.tips.length - 1; i >= 0; i--) if (!this.stepBloomTip(this.tips[i])) this.tips.splice(i, 1);
+    } else this.kick();
+  };
+
   private stepBloomTip(t: Tip): boolean {
     if (t.delay > 0) { t.delay--; return true; }   // staggered start — wait, stay active
     const prog = t.len / t.maxLen;
