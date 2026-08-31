@@ -6,7 +6,7 @@ import GrowthGround from '../components/GrowthGround.astro';
 const { title } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/+$/, ''); // '' at root, '/the100lab' on Pages
 const description = 'Robocobra Quartet — Hundred Pieces. 100 pieces, coming 2026.';
-const ogImage = new URL(base + '/assets/images/og-cover.jpg', Astro.site).href;
+const ogImage = new URL(base + '/assets/images/og-preview.jpg', Astro.site).href;
 // Self-hosted TeX Gyre Heros (a Nimbus Sans / Helvetica-metric design, GUST Font License /
 // LPPL 1.3c — web-embeddable). Subset woff2; weight 600 maps to Bold (700). Base-aware string
 // because CSS url() can't read the Astro base path. Licence ships in /assets/fonts/.
