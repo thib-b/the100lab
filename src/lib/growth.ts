@@ -38,7 +38,7 @@ export class GrowthGround {
   private stamp = document.createElement('canvas');    // full-res, crisp
   private sc = this.stamp.getContext('2d')!;
   private mk = document.createElement('canvas');       // stamp alpha mask
-  private mx = this.mk.getContext('2d')!;
+  private mx = this.mk.getContext('2d', { willReadFrequently: true })!;   // CPU-backed so getImageData is reliable
   private W = 0; private H = 0; private dprB = 1; private dprF = 1;
   private age = 0; private g = 0;
   private ink: string;
@@ -51,7 +51,7 @@ export class GrowthGround {
   private stampImg?: HTMLImageElement; private maskImg?: Uint8ClampedArray;
   private edgePts: { x: number; y: number }[] = []; private seededTips = 0;
   private veins: Vein[] = [];
-  private cxc = 0; private cyc = 0; private nogoR = 0; private stampSize = 0;
+  private cxc = 0; private cyc = 0; private nogoR = 0; private stampSize = 0; private maskFailed = false;
 
   constructor(private el: HTMLElement, opts: { groundHex: string }) {
     this.ink = inkFor(opts.groundHex);
@@ -114,19 +114,41 @@ export class GrowthGround {
     const size = Math.min(this.H * 0.44, this.W * 0.80); this.stampSize = size;
     const ox = this.cxc - size / 2, oy = this.cyc - size / 2;
     this.mx.drawImage(this.stampImg, ox, oy, size, size);
-    this.maskImg = this.mx.getImageData(0, 0, this.W * this.dprF, this.H * this.dprF).data;
     this.nogoR = size * 0.72;
     this.edgePts = [];
-    const step = Math.max(3, Math.round(3 * this.dprF));
-    const A = (px: number, py: number) => {
-      px = (px * this.dprF) | 0; py = (py * this.dprF) | 0;
-      if (px < 0 || py < 0 || px >= this.W * this.dprF || py >= this.H * this.dprF) return 0;
-      return this.maskImg![(py * this.W * this.dprF + px) * 4 + 3];
-    };
-    for (let y = oy; y < oy + size; y += step / this.dprF)
-      for (let x = ox; x < ox + size; x += step / this.dprF) {
-        if (A(x, y) > 70) { const dd = step / this.dprF + 1; if (A(x - dd, y) < 70 || A(x + dd, y) < 70 || A(x, y - dd) < 70 || A(x, y + dd) < 70) this.edgePts.push({ x, y }); }
-      }
+    let data: Uint8ClampedArray | undefined;
+    try { data = this.mx.getImageData(0, 0, this.W * this.dprF, this.H * this.dprF).data; } catch { data = undefined; }
+    if (data) {
+      this.maskImg = data;
+      const step = Math.max(3, Math.round(3 * this.dprF));
+      const A = (px: number, py: number) => {
+        px = (px * this.dprF) | 0; py = (py * this.dprF) | 0;
+        if (px < 0 || py < 0 || px >= this.W * this.dprF || py >= this.H * this.dprF) return 0;
+        return this.maskImg![(py * this.W * this.dprF + px) * 4 + 3];
+      };
+      for (let y = oy; y < oy + size; y += step / this.dprF)
+        for (let x = ox; x < ox + size; x += step / this.dprF) {
+          if (A(x, y) > 70) { const dd = step / this.dprF + 1; if (A(x - dd, y) < 70 || A(x + dd, y) < 70 || A(x, y - dd) < 70 || A(x, y + dd) < 70) this.edgePts.push({ x, y }); }
+        }
+    }
+    // If the pixel readback was blocked or came back blank (some Android browsers: canvas
+    // anti-fingerprinting or GPU readback), we can't drive the vein reveal — draw the stamp
+    // directly so the title still shows everywhere.
+    if (!data || this.edgePts.length === 0) {
+      this.maskFailed = true; this.maskImg = undefined; this.edgePts = [];
+      this.drawStampFallback(ox, oy, size);
+    } else {
+      this.maskFailed = false;
+    }
+  }
+  private drawStampFallback(ox: number, oy: number, size: number) {
+    if (!this.stampImg) return;
+    const s = 512, t = document.createElement('canvas'); t.width = t.height = s;
+    const tx = t.getContext('2d')!;
+    tx.drawImage(this.stampImg, 0, 0, s, s);
+    tx.globalCompositeOperation = 'source-in'; tx.fillStyle = this.ink; tx.fillRect(0, 0, s, s);   // tint to the ink colour
+    this.sc.clearRect(ox, oy, size, size);
+    this.sc.globalAlpha = 0.9; this.sc.drawImage(t, ox, oy, size, size); this.sc.globalAlpha = 1;
   }
   private inMask(x: number, y: number) {
     if (!this.maskImg) return false;
