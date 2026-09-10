@@ -3,7 +3,6 @@ import { ClientRouter } from 'astro:transitions';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import GrowthGround from '../components/GrowthGround.astro';
-const { title } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/+$/, ''); // '' at root, '/the100lab' on Pages
 const description = 'Robocobra Quartet — Hundred Pieces. 100 pieces, coming 2026.';
 const ogImage = new URL(base + '/assets/images/og-preview.jpg', Astro.site).href;
@@ -49,7 +48,7 @@ const fontCss = `@font-face{font-family:"TeX Gyre Heros";font-style:normal;font-
         window.__groundHex = hex;
       })();
     </script>
-    <title>{title} — Robocobra Quartet</title>
+    <title>Robocobra Quartet</title>
     <meta name="description" content={description} />
     <meta property="og:title" content="Hundred Pieces — Robocobra Quartet" />
     <meta property="og:description" content={description} />
