@@ -1,0 +1,84 @@
+---
+// Native EmailOctopus signup. Posts directly to the form's own public endpoint
+// (https://eocampaign1.com/form/<id>) — the same URL EmailOctopus's embed script posts to,
+// keyed to the public form id, not any secret API key. Rolling our own means visitors load
+// NO EmailOctopus JS, no Google reCAPTCHA, and no third-party font, and the form is styled to
+// the site. The endpoint returns access-control-allow-origin:* so JS submits via fetch() and
+// shows inline status; the plain <form action> is a no-JS fallback that posts the same fields.
+const FORM_ID = '4baae2fc-ad1b-11f1-9b68-07886df76fee';
+const ENDPOINT = `https://eocampaign1.com/form/${FORM_ID}`;
+// Honeypot field name from the form (bots fill it; real people never see it). Kept empty.
+const HONEYPOT = 'hpc4b27b6e-eb38-11e9-be00-06b4694bee2a';
+
+interface Props {
+  heading?: string;
+  button?: string;
+}
+const { heading, button = 'Notify me' } = Astro.props;
+---
+<form class="ml" data-endpoint={ENDPOINT} action={ENDPOINT} method="post" target="_blank" novalidate>
+  {heading && <h3 class="ml-heading">{heading}</h3>}
+  <div class="ml-row">
+    <input class="ml-email" type="email" name="field_0" required placeholder="Email address"
+      aria-label="Email address" autocomplete="email" inputmode="email" />
+    <button class="ml-submit" type="submit">{button}</button>
+  </div>
+  <div class="ml-hp" aria-hidden="true"><input type="text" name={HONEYPOT} tabindex="-1" autocomplete="off" /></div>
+  <p class="ml-status" role="status" aria-live="polite" hidden></p>
+</form>
+
+<style>
+  /* cap + centre so the field is the same size everywhere; without this it stretches
+     to fill the wide /contact/ column while staying slim in the 460px splash card. */
+  .ml{width:100%;max-width:420px;margin-inline:auto}
+  .ml-heading{margin:0 0 .7rem;font-size:1.05rem}
+  .ml-row{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+  .ml-email{flex:1 1 210px;min-width:0;padding:.62rem .85rem;border-radius:9px;
+    border:1px solid rgba(0,0,0,.18);background:rgba(255,255,255,.94);color:#141414;font:inherit}
+  .ml-submit{padding:.62rem 1.15rem;border-radius:9px;border:1px solid var(--ink);
+    background:var(--ink);color:var(--ground);cursor:pointer;font:inherit;font-weight:600;transition:opacity .15s}
+  .ml-submit:hover{opacity:.85}
+  .ml-submit:disabled{opacity:.55;cursor:default}
+  /* honeypot: visually and programmatically removed from the flow, but present for bots */
+  .ml-hp{position:absolute;left:-5000px;width:1px;height:1px;overflow:hidden}
+  .ml-status{margin:.7rem 0 0;font-size:.92rem;min-height:1.2em}
+  .ml-status[data-ok="1"]{opacity:.95}
+  .ml-status[data-ok="0"]{opacity:.95}
+</style>
+
+<script is:inline>
+  // Bind once on document so it survives Astro view-transition (ClientRouter) DOM swaps —
+  // document persists across soft navigations, individual form nodes do not.
+  if (!window.__mlBound) {
+    window.__mlBound = true;
+    document.addEventListener('submit', async (e) => {
+      const form = e.target;
+      if (!(form instanceof HTMLFormElement) || !form.classList.contains('ml')) return;
+      e.preventDefault();
+      const email = form.querySelector('.ml-email');
+      const btn = form.querySelector('.ml-submit');
+      const status = form.querySelector('.ml-status');
+      const show = (msg, ok) => {
+        if (!status) return;
+        status.textContent = msg;
+        status.dataset.ok = ok ? '1' : '0';
+        status.hidden = false;
+      };
+      if (email && !email.checkValidity()) { email.reportValidity(); return; }
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch(form.dataset.endpoint, { method: 'POST', body: new FormData(form) });
+        if (res.ok) {
+          show('Thank you!', true);
+          form.reset();
+        } else {
+          show('Sorry, something went wrong. Please try again.', false);
+        }
+      } catch (err) {
+        show('Couldn’t reach the server — check your connection and try again.', false);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+  }
+</script>
