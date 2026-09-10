@@ -12,7 +12,11 @@ type Vein = { x: number; y: number; ang: number; life: number; w: number };
 
 const WHITES = ['#f4f3ee', '#eae6da', '#f2eee6'];
 const DARKS = ['#1c1b17', '#262521', '#2f3a26', '#241f1b', '#1f302e', '#33322c'];
-const DUR = 4200;                 // frames for the plate to fully colonise (~70s at 60fps)
+const DUR = 4200;                 // simulation ticks to fully colonise the plate (~70s wall-clock)
+const SIM_STEP = 1000 / 60;       // ms per simulation tick. The loop runs a fixed ~60 ticks/sec via an
+                                  // accumulator, so the *pace* is wall-clock based (identical on any FPS)
+                                  // while each tick stays the old per-frame logic (identical look).
+const MAX_SUBSTEPS = 5;           // cap ticks/frame so a very slow device just slows down, never freezes
 
 // --- bloom look (tuned with thib; slider estimates on a 0..1 scale) ---
 const BLOOM_BLUR_PX = 0.5;        // CSS blur on the blooms layer   (Blur ~0.15)
@@ -44,6 +48,7 @@ export class GrowthGround {
   private ink: string;
   private reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
   private raf = 0; private running = false; private pendingSettle = false;
+  private last = 0; private acc = 0;   // fixed-timestep clock (see SIM_STEP)
   // blooms
   private tips: Tip[] = []; private bloomsSpawned = 0;
   // stamp reveal
@@ -257,14 +262,23 @@ export class GrowthGround {
     if (this.maskReady && this.seededTips < Math.round(this.edgePts.length * 1.15)) return false;
     return true;
   }
-  private loop = () => {
-    this.grow();
+  private loop = (now: number) => {
+    if (!this.last) this.last = now;
+    let dt = now - this.last; this.last = now;
+    if (dt > 250) dt = SIM_STEP;   // after a tab-away/stall the timestamp jumps — don't burst catch-up
+    this.acc += dt;
+    // Run whole simulation ticks to track wall-clock time: ~1 tick/frame at 60fps, ~2 at 30fps, and on
+    // a 120Hz display some frames run 0 ticks — so the pace no longer depends on the achieved FPS.
+    let n = 0;
+    while (this.acc >= SIM_STEP && n < MAX_SUBSTEPS) { this.grow(); this.acc -= SIM_STEP; n++; }
+    if (n === MAX_SUBSTEPS) this.acc = 0;   // very slow device: drop the backlog rather than spiral
     if (this.settled()) { this.running = false; return; }   // stop the rAF loop — ~0 CPU at rest
     this.raf = requestAnimationFrame(this.loop);
   };
   private kick() {
     if (this.reduced || this.running || this.settled()) return;
-    this.running = true; cancelAnimationFrame(this.raf); this.raf = requestAnimationFrame(this.loop);
+    this.running = true; this.last = 0; this.acc = 0;   // reset the clock so resume/resize doesn't burst
+    cancelAnimationFrame(this.raf); this.raf = requestAnimationFrame(this.loop);
   }
 
   // reduced-motion: fast-forward to a settled plate (no animation), then hold
