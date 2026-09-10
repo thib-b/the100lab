@@ -27,11 +27,10 @@ const socials = [
       </li>
     ))}
   </ul>
-  <p>Robocobra Quartet — Hundred Pieces</p>
 </footer>
 <style>
-  footer { margin-top: 4rem; padding: 1.5rem 0; opacity: .9; font-size: .85rem; text-align: center; }
-  .socials { display: flex; justify-content: center; gap: 1.1rem; list-style: none; margin: 0 0 1rem; padding: 0; flex-wrap: wrap; }
+  footer { margin-top: clamp(0.75rem, 3vw, 2.5rem); padding: 1rem 0; opacity: .9; font-size: .85rem; text-align: center; }
+  .socials { display: flex; justify-content: center; gap: 1.1rem; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
   .socials a { color: var(--ink); display: inline-flex; opacity: .7; transition: opacity .15s; }
   .socials a:hover, .socials a:focus-visible { opacity: 1; }
 </style>

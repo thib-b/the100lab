@@ -32,10 +32,12 @@ const { heading, button = 'Notify me' } = Astro.props;
      to fill the wide /contact/ column while staying slim in the 460px splash card. */
   .ml{width:100%;max-width:420px;margin-inline:auto}
   .ml-heading{margin:0 0 .7rem;font-size:1.05rem}
-  .ml-row{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
-  .ml-email{flex:1 1 210px;min-width:0;padding:.62rem .85rem;border-radius:9px;
+  /* nowrap keeps the email field and button on one line; the field shrinks (min-width:0)
+     rather than the button dropping below it on narrow screens. */
+  .ml-row{display:flex;gap:.5rem;flex-wrap:nowrap;justify-content:center}
+  .ml-email{flex:1 1 0;min-width:0;padding:.62rem .85rem;border-radius:9px;
     border:1px solid rgba(0,0,0,.18);background:rgba(255,255,255,.94);color:#141414;font:inherit}
-  .ml-submit{padding:.62rem 1.15rem;border-radius:9px;border:1px solid var(--ink);
+  .ml-submit{flex:0 0 auto;white-space:nowrap;padding:.62rem 1.15rem;border-radius:9px;border:1px solid var(--ink);
     background:var(--ink);color:var(--ground);cursor:pointer;font:inherit;font-weight:600;transition:opacity .15s}
   .ml-submit:hover{opacity:.85}
   .ml-submit:disabled{opacity:.55;cursor:default}

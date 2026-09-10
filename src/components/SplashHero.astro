@@ -15,7 +15,10 @@ import PreSave from './PreSave.astro';
   </div>
 </section>
 <style>
-  .splash{min-height:calc(100vh - 130px);display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+  /* Reserve roughly the space above the centred stamp so the card sits just below the stamp
+     and stays fully on-screen; the footer then follows (a short scroll away, which is fine).
+     dvh keeps mobile browser chrome from inflating the height. */
+  .splash{min-height:calc(100dvh - 200px);display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .notify{width:100%;max-width:460px;padding:1rem 1.2rem;text-align:center;
     display:flex;flex-direction:column;align-items:center;gap:1rem}
