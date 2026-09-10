@@ -10,6 +10,16 @@ import PreSave from './PreSave.astro';
   <h1 class="sr-only">Robocobra Quartet — Hundred Pieces</h1>
   <div class="notify scrim">
     <p class="eyebrow">Coming September 16th</p>
+    {/* Bandcamp "Wellness" taster — hidden for now. To show it above the pre-save buttons,
+        remove the {/* opening below and its closing marker (the .player CSS is kept in place). */}
+    {/*
+    <div class="player">
+      <iframe title="Robocobra Quartet — Wellness (Bandcamp player)" loading="lazy"
+        style="border:0;width:100%;height:42px;"
+        src="https://bandcamp.com/EmbeddedPlayer/album=4004019889/size=small/bgcol=ffffff/linkcol=63b2cc/artwork=none/track=858971339/transparent=true/"
+        seamless><a href="https://robocobraquartet.bandcamp.com/album/living-isnt-easy">Wellness by Robocobra Quartet</a></iframe>
+    </div>
+    */}
     <PreSave />
     <MailingList />
   </div>
@@ -23,4 +33,9 @@ import PreSave from './PreSave.astro';
   .notify{width:100%;max-width:460px;padding:1rem 1.2rem;text-align:center;
     display:flex;flex-direction:column;align-items:center;gap:1rem}
   .eyebrow{margin:0;text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;opacity:.9}
+  /* Bandcamp's small player picks a light/dark theme from bgcol's luminance (ffffff = light,
+     to match the white email field / cream button); framed with the same 9px rounded corners
+     as the pre-save box so it reads as a deliberate "listen" chip. */
+  .player{width:100%;max-width:420px;margin:0 auto;border-radius:9px;overflow:hidden;line-height:0}
+  .player iframe{display:block}
 </style>
