@@ -4,17 +4,20 @@
 // the EmailOctopus endpoint, no third-party JS), kept toward the lower centre so the reveal
 // stays clear above it on short screens.
 import MailingList from './MailingList.astro';
+import PreSave from './PreSave.astro';
 ---
 <section class="splash">
   <h1 class="sr-only">Robocobra Quartet — Hundred Pieces</h1>
   <div class="notify scrim">
     <p class="eyebrow">Coming September 16th</p>
+    <PreSave />
     <MailingList />
   </div>
 </section>
 <style>
   .splash{min-height:calc(100vh - 130px);display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  .notify{width:100%;max-width:460px;padding:1rem 1.2rem;text-align:center}
-  .eyebrow{margin:0 0 .8em;text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;opacity:.9}
+  .notify{width:100%;max-width:460px;padding:1rem 1.2rem;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:1rem}
+  .eyebrow{margin:0;text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;opacity:.9}
 </style>
