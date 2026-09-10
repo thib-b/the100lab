@@ -13,7 +13,7 @@
   // The head inline script picks the ground colour before first paint and stores it here.
   const groundHex = w.__groundHex
     || getComputedStyle(document.documentElement).getPropertyValue('--ground').trim()
-    || '#17b6c9';
+    || '#28a6a7';
   w.__groundHex = groundHex;
 
   // Astro resets the <html> inline style on view-transition swaps, so re-apply the seeded

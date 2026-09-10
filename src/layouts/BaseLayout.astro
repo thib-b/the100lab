@@ -20,13 +20,13 @@ const fontCss = `@font-face{font-family:"TeX Gyre Heros";font-style:normal;font-
     <link rel="preload" href={base + '/assets/fonts/TeXGyreHeros-Bold.woff2'} as="font" type="font/woff2" crossorigin />
     <style is:inline set:html={fontCss}></style>
     <script is:inline>
-      // Pick the plate ground colour before first paint so there is no flash of the
-      // default turquoise while GrowthGround's module script (deferred) spins up.
-      // GrowthGround.astro reuses window.__groundHex so the canvas tint matches exactly.
-      // Palette/inkFor/scrimFor are small self-contained copies of src/data/palette.ts
-      // and src/lib/color.ts (kept in sync manually — this must stay inline + tiny).
+      // Set the plate ground colour before first paint so there is no colour flash while
+      // GrowthGround's module script (deferred) spins up. The ground is fixed to the Hundred
+      // Pieces album background teal (sampled from HundredPieces_Album_Artwork.jpg) — it no
+      // longer randomises per load. GrowthGround.astro reuses window.__groundHex so the canvas
+      // tint matches exactly. inkFor/scrimFor are small self-contained copies of src/lib/color.ts
+      // (kept in sync manually — this must stay inline + tiny).
       (function () {
-        var palette = ['#17b6c9', '#f2c80f', '#e8743f', '#2f7fd0', '#9fb833', '#d15a86', '#8163a6', '#bd5230', '#c8347a'];
         function relLum(hex) {
           var h = hex.replace('#', '');
           var c = [parseInt(h.slice(0, 2), 16) / 255, parseInt(h.slice(2, 4), 16) / 255, parseInt(h.slice(4, 6), 16) / 255];
@@ -35,10 +35,7 @@ const fontCss = `@font-face{font-family:"TeX Gyre Heros";font-style:normal;font-
         }
         function inkFor(hex) { return relLum(hex) > 0.42 ? '#141414' : '#f4f3ee'; }
         function scrimFor(hex) { return relLum(hex) > 0.5 ? 'rgba(255,255,255,.34)' : 'rgba(0,0,0,.26)'; }
-        // Pick once per full page load and reuse across view-transition navigations
-        // (this script re-runs on each swap; without this the ground — and the invert-driven
-        // logo — would reseed to a new colour on every click).
-        var hex = window.__groundHex || palette[Math.floor(Math.random() * palette.length)];
+        var hex = '#28a6a7';   // Hundred Pieces album background teal
         var ink = inkFor(hex);
         var root = document.documentElement;
         root.style.setProperty('--ground', hex);
@@ -66,7 +63,7 @@ const fontCss = `@font-face{font-family:"TeX Gyre Heros";font-style:normal;font-
       <Footer />
     </div>
     <style is:global>
-      :root{ --ground:#17b6c9; --ink:#f4f3ee; --scrim:rgba(0,0,0,.26); --logo-invert:0;
+      :root{ --ground:#28a6a7; --ink:#f4f3ee; --scrim:rgba(0,0,0,.26); --logo-invert:1;
         /* Self-hosted TeX Gyre Heros (the web-licensed Nimbus Sans / Helvetica design) is the
            primary face on every device; the rest are metric-compatible fallbacks if it fails to
            load (local Nimbus Sans, Helvetica Neue on Apple, Arial on Windows, Liberation Sans). */
