@@ -89,7 +89,9 @@ export class GrowthGround {
     img.src = stampUrl;
   }
 
-  private onVis = () => { if (document.hidden) cancelAnimationFrame(this.raf); else if (!this.reduced) this.kick(); };
+  // Pause when the tab is hidden (e.g. the pre-save link opens a new tab) and resume on return.
+  // Must clear `running` here, or kick()'s `running` guard would bail and leave the plate frozen.
+  private onVis = () => { if (document.hidden) { cancelAnimationFrame(this.raf); this.running = false; } else if (!this.reduced) this.kick(); };
   private onResize = () => this.size();
 
   private size = () => {
