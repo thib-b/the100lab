@@ -4,7 +4,7 @@ import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import GrowthGround from '../components/GrowthGround.astro';
 const base = import.meta.env.BASE_URL.replace(/\/+$/, ''); // '' at root, '/the100lab' on Pages
-const description = 'Robocobra Quartet — Hundred Pieces. 100 pieces, coming 2026.';
+const description = 'Robocobra Quartet - Coming September 16th';
 const ogImage = new URL(base + '/assets/images/og-hundred-pieces.jpg', Astro.site).href;
 // Self-hosted TeX Gyre Heros (a Nimbus Sans / Helvetica-metric design, GUST Font License /
 // LPPL 1.3c — web-embeddable). Subset woff2; weight 600 maps to Bold (700). Base-aware string
@@ -47,7 +47,7 @@ const fontCss = `@font-face{font-family:"TeX Gyre Heros";font-style:normal;font-
     </script>
     <title>Robocobra Quartet</title>
     <meta name="description" content={description} />
-    <meta property="og:title" content="Hundred Pieces — Robocobra Quartet" />
+    <meta property="og:title" content="Robocobra Quartet - Official Website" />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:image" content={ogImage} />
