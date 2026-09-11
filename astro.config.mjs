@@ -1,11 +1,12 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 
-// Served from a GitHub Pages project subpath (thib-b.github.io/the100lab). The deploy workflow
-// sets PAGES_BASE=/the100lab; local dev + e2e leave it unset so everything stays at root.
-// All hardcoded asset/link paths are prefixed with import.meta.env.BASE_URL so both resolve.
+// Served at the root of the custom domain (robocobraquartet.com) via GitHub Pages. `base` stays
+// PAGES_BASE-driven but defaults to '/', and the deploy workflow no longer sets PAGES_BASE, so the
+// site builds for root. All asset/link paths use import.meta.env.BASE_URL, so root serving is
+// automatic (local dev + e2e already run at root).
 export default defineConfig({
-  site: 'https://thib-b.github.io',
+  site: 'https://robocobraquartet.com',
   base: process.env.PAGES_BASE ?? '/',
   integrations: [mdx()],
   // View Transitions are enabled per-page via <ClientRouter/> in BaseLayout.
