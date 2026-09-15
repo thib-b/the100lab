@@ -10,7 +10,7 @@ test('splash shows Hundred Pieces and not the album page, /lie/ is reachable dir
   await page.goto('/');
   // The visible title is grown by the canvas (decorative); the accessible heading carries the text.
   await expect(page.getByRole('heading', { name: /hundred pieces/i })).toBeAttached();
-  await expect(page.getByText('Coming 2026')).toBeVisible();
+  await expect(page.getByText(/Coming September 16th/i)).toBeVisible();
   await expect(page.getByRole('heading', { name: "Living Isn't Easy" })).toHaveCount(0);
   await page.goto('/lie/');
   await expect(page.getByRole('heading', { name: "Living Isn't Easy" })).toBeVisible();

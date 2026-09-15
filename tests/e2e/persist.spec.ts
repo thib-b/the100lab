@@ -15,9 +15,9 @@ test('songkick widget mounts after client-side nav to /tour/', async ({ page }) 
   await expect(page.locator('#songkick-embed')).toBeAttached();
 });
 
-test('mailchimp form mounts after client-side nav to /contact/', async ({ page }) => {
+test('mailing-list signup mounts after client-side nav to /contact/', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'contact', exact: true }).click();
   await expect(page).toHaveURL(/\/contact\/?$/);
-  await expect(page.locator('#mc-embedded-subscribe-form')).toBeAttached();
+  await expect(page.locator('.ml-eo')).toBeAttached();
 });

@@ -1,14 +1,12 @@
 ---
-// Native EmailOctopus signup. Posts directly to the form's own public endpoint
-// (https://eocampaign1.com/form/<id>) — the same URL EmailOctopus's embed script posts to,
-// keyed to the public form id, not any secret API key. Rolling our own means visitors load
-// NO EmailOctopus JS, no Google reCAPTCHA, and no third-party font, and the form is styled to
-// the site. The endpoint returns access-control-allow-origin:* so JS submits via fetch() and
-// shows inline status; the plain <form action> is a no-JS fallback that posts the same fields.
+// EmailOctopus signup via the vendor's own embed script. We deliberately use the embed (rather
+// than a rolled-our-own POST) because EmailOctopus's reCAPTCHA — the fix for bot signups — is only
+// validated server-side against the hosted form, so it can't ride on a custom POST. The embed
+// injects inline DOM (not an iframe), so we hide its "Powered by EmailOctopus" badge and restyle the
+// injected form to match the site (see the is:global block). reCAPTCHA is enabled in the EmailOctopus
+// dashboard, not here.
 const FORM_ID = '4baae2fc-ad1b-11f1-9b68-07886df76fee';
-const ENDPOINT = `https://eocampaign1.com/form/${FORM_ID}`;
-// Honeypot field name from the form (bots fill it; real people never see it). Kept empty.
-const HONEYPOT = 'hpc4b27b6e-eb38-11e9-be00-06b4694bee2a';
+const EMBED_SRC = `https://eocampaign1.com/form/${FORM_ID}.js`;
 
 interface Props {
   heading?: string;
@@ -16,71 +14,104 @@ interface Props {
 }
 const { heading, button = 'Notify me' } = Astro.props;
 ---
-<form class="ml" data-endpoint={ENDPOINT} action={ENDPOINT} method="post" target="_blank" novalidate>
+<div class="ml">
   {heading && <h3 class="ml-heading">{heading}</h3>}
-  <div class="ml-row">
-    <input class="ml-email" type="email" name="field_0" required placeholder="Email address"
-      aria-label="Email address" autocomplete="email" inputmode="email" />
-    <button class="ml-submit" type="submit">{button}</button>
-  </div>
-  <div class="ml-hp" aria-hidden="true"><input type="text" name={HONEYPOT} tabindex="-1" autocomplete="off" /></div>
-  <p class="ml-status" role="status" aria-live="polite" hidden></p>
-</form>
+  {/* The embed injects its form inside this mount. Our own heading above stands in for EO's. */}
+  <div class="ml-eo" data-eo-src={EMBED_SRC} data-eo-form={FORM_ID} data-eo-btn={button}></div>
+</div>
 
 <style>
-  /* cap + centre so the field is the same size everywhere; without this it stretches
-     to fill the wide /contact/ column while staying slim in the 460px splash card. */
+  /* Our own wrapper + heading (scoped). Same sizing as before so the field stays the same width
+     everywhere: slim in the 460px splash card, capped rather than stretching the wide /contact/ column. */
   .ml{width:100%;max-width:420px;margin-inline:auto}
   .ml-heading{margin:0 0 .7rem;font-size:1.05rem}
-  /* nowrap keeps the email field and button on one line; the field shrinks (min-width:0)
-     rather than the button dropping below it on narrow screens. */
-  .ml-row{display:flex;gap:.5rem;flex-wrap:nowrap;justify-content:center}
-  .ml-email{flex:1 1 0;min-width:0;padding:.62rem .85rem;border-radius:9px;
-    border:1px solid rgba(0,0,0,.18);background:rgba(255,255,255,.94);color:#141414;font:inherit}
-  .ml-submit{flex:0 0 auto;white-space:nowrap;padding:.62rem 1.15rem;border-radius:9px;border:1px solid var(--ink);
-    background:var(--ink);color:var(--ground);cursor:pointer;font:inherit;font-weight:600;transition:opacity .15s}
-  .ml-submit:hover{opacity:.85}
-  .ml-submit:disabled{opacity:.55;cursor:default}
-  /* honeypot: visually and programmatically removed from the flow, but present for bots */
-  .ml-hp{position:absolute;left:-5000px;width:1px;height:1px;overflow:hidden}
-  .ml-status{margin:.7rem 0 0;font-size:.92rem;min-height:1.2em}
-  .ml-status[data-ok="1"]{opacity:.95}
-  .ml-status[data-ok="0"]{opacity:.95}
+</style>
+
+<style is:global>
+  /* Override EmailOctopus's injected form to match the site. Selectors match the embed's real decoded
+     markup: form.emailoctopus-form > .main-form > [eo-form-fields-container] > .emailoctopus-form-row
+     > input#field_0.form-control, then <input type="submit" class="btn w-100 btn-primary"> inside
+     .main-form; success/error are <p class="emailoctopus-(success|error)-message"> siblings ABOVE the
+     form; the badge is .mastfoot. There is no EO heading or <label> to hide. Must be global +
+     !important: the DOM is injected at runtime (Astro scoped styles never reach it) and EmailOctopus
+     ships its own stylesheet (and beats the wrapper's inline styles, which are not !important). */
+  .ml-eo,
+  .ml-eo *{box-sizing:border-box}
+  /* strip EO's card chrome so it sits flush like the old form */
+  .ml-eo .inline-container,
+  .ml-eo .form-container,
+  .ml-eo .emailoctopus-form-wrapper,
+  .ml-eo .emailoctopus-form,
+  .ml-eo .main-form{margin:0!important;padding:0!important;max-width:none!important;
+    width:100%!important;background:none!important;border:0!important;box-shadow:none!important}
+  /* hide the "Powered by EmailOctopus" badge */
+  .ml-eo .mastfoot{display:none!important}
+  /* one nowrap row: flex on .main-form (holds the field + submit), with display:contents dissolving
+     EO's nested field wrappers so the email input and submit input become direct flex siblings */
+  .ml-eo .main-form{display:flex!important;gap:.5rem!important;flex-wrap:nowrap!important;
+    justify-content:center;align-items:stretch}
+  /* the email <input> ignores the inherited 1.55 line-height for its box height while the submit
+     honours it, so let both stretch to the same row height (text stays vertically centred) */
+  .ml-eo [eo-form-fields-container],
+  .ml-eo .emailoctopus-form-row{display:contents!important}
+  /* keep the honeypot row out of the flow */
+  .ml-eo .emailoctopus-form-row-hp{position:absolute!important;left:-5000px!important;width:1px!important;
+    height:1px!important;overflow:hidden!important}
+  /* email input: matches the old .ml-email exactly. height:auto removes EO's pinned .form-control
+     height so align-items:stretch can size it to the submit's height. */
+  .ml-eo input[type="email"],
+  .ml-eo .form-control{flex:1 1 0!important;min-width:0!important;width:auto!important;height:auto!important;
+    padding:.62rem .85rem!important;border-radius:9px!important;border:1px solid rgba(0,0,0,.18)!important;
+    background:rgba(255,255,255,.94)!important;color:#141414!important;font:inherit!important;margin:0!important}
+  /* submit: matches the old .ml-submit exactly (ink fill, ground text); overrides EO's w-100 + mb-2 */
+  .ml-eo input[type="submit"],
+  .ml-eo .btn-primary{flex:0 0 auto!important;white-space:nowrap!important;width:auto!important;
+    padding:.62rem 1.15rem!important;border-radius:9px!important;border:1px solid var(--ink)!important;
+    background:var(--ink)!important;color:var(--ground)!important;cursor:pointer;font:inherit!important;
+    font-weight:600!important;transition:opacity .15s;margin:0!important}
+  .ml-eo input[type="submit"]:hover,
+  .ml-eo .btn-primary:hover{opacity:.85}
+  .ml-eo input[type="submit"]:disabled,
+  .ml-eo .btn-primary:disabled{opacity:.55;cursor:default}
+  /* success / error line (empty until submit); only take vertical space once populated */
+  .ml-eo .emailoctopus-success-message,
+  .ml-eo .emailoctopus-error-message{margin:0!important;font-size:.92rem;color:inherit!important}
+  .ml-eo .emailoctopus-success-message:not(:empty),
+  .ml-eo .emailoctopus-error-message:not(:empty){margin:0 0 .7rem!important}
 </style>
 
 <script is:inline>
-  // Bind once on document so it survives Astro view-transition (ClientRouter) DOM swaps —
-  // document persists across soft navigations, individual form nodes do not.
-  if (!window.__mlBound) {
-    window.__mlBound = true;
-    document.addEventListener('submit', async (e) => {
-      const form = e.target;
-      if (!(form instanceof HTMLFormElement) || !form.classList.contains('ml')) return;
-      e.preventDefault();
-      const email = form.querySelector('.ml-email');
-      const btn = form.querySelector('.ml-submit');
-      const status = form.querySelector('.ml-status');
-      const show = (msg, ok) => {
-        if (!status) return;
-        status.textContent = msg;
-        status.dataset.ok = ok ? '1' : '0';
-        status.hidden = false;
-      };
-      if (email && !email.checkValidity()) { email.reportValidity(); return; }
-      if (btn) btn.disabled = true;
-      try {
-        const res = await fetch(form.dataset.endpoint, { method: 'POST', body: new FormData(form) });
-        if (res.ok) {
-          show('Thank you!', true);
-          form.reset();
-        } else {
-          show('Sorry, something went wrong. Please try again.', false);
+  // Inject the EmailOctopus embed into each .ml-eo mount. Runs on astro:page-load so it fires on the
+  // first load AND every ClientRouter (view-transition) navigation — the form lives on the splash and
+  // on /contact/, and soft navigations swap in fresh .ml-eo nodes that need the embed re-injected.
+  (function () {
+    function mount(el) {
+      if (el.dataset.mounted) return;            // per-node guard: never double-inject one mount
+      el.dataset.mounted = '1';
+      // Once the embed's DOM appears, force the button label to our text. EO renders the submit as an
+      // <input type="submit"> (labelled via value), so set .value; fall back to textContent if it's a
+      // <button>. This keeps the label matching the site regardless of the EO dashboard setting.
+      var obs = new MutationObserver(function () {
+        var btn = el.querySelector('input[type="submit"], button[type="submit"]');
+        if (!btn) return;                         // the submit is the last thing we wait for
+        if (el.dataset.eoBtn) {
+          if (btn.tagName === 'INPUT') btn.value = el.dataset.eoBtn;
+          else btn.textContent = el.dataset.eoBtn;
         }
-      } catch (err) {
-        show('Couldn’t reach the server — check your connection and try again.', false);
-      } finally {
-        if (btn) btn.disabled = false;
-      }
-    });
-  }
+        obs.disconnect();
+      });
+      obs.observe(el, { childList: true, subtree: true });
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = el.dataset.eoSrc;
+      s.setAttribute('data-form', el.dataset.eoForm);
+      el.appendChild(s);                          // embed uses currentScript, so form lands in .ml-eo
+    }
+    function mountAll() { document.querySelectorAll('.ml-eo').forEach(mount); }
+    if (!window.__mlEOBound) {                     // bind the listener once, even if this script re-runs
+      window.__mlEOBound = true;
+      document.addEventListener('astro:page-load', mountAll);
+    }
+    mountAll();                                     // handle the case where page-load already fired
+  })();
 </script>

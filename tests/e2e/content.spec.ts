@@ -26,8 +26,8 @@ test('tour lists past tour dates', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Past Tour Dates' })).toBeVisible();
   await expect(page.getByText('Glastonbury Festival')).toBeVisible();
 });
-test('contact shows emails and mailchimp form', async ({ page }) => {
+test('contact shows emails and mailing-list signup', async ({ page }) => {
   await page.goto('/contact/');
   await expect(page.getByRole('link', { name: 'robocobraquartet@gmail.com' })).toBeVisible();
-  await expect(page.locator('#mc-embedded-subscribe-form')).toBeAttached();
+  await expect(page.locator('.ml-eo')).toBeAttached();
 });
