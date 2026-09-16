@@ -36,8 +36,10 @@ import MailingList from './MailingList.astro';
   .notify{width:100%;max-width:460px;padding:1rem 1.2rem;text-align:center;
     display:flex;flex-direction:column;align-items:center;gap:1rem}
   .eyebrow{margin:0;text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;opacity:.9}
+  /* no underline — a small ↗ marks it as a link (nudges on hover) */
   .eyebrow a{color:inherit;text-decoration:none}
-  .eyebrow a:hover{text-decoration:underline}
+  .eyebrow a::after{content:"\00A0\2197";display:inline-block;opacity:.75;transition:transform .12s ease}
+  .eyebrow a:hover::after{transform:translate(1px,-1px);opacity:1}
   /* Bandcamp's small player picks a light/dark theme from bgcol's luminance (ffffff = light,
      to match the white email field / cream button); framed with the same 9px rounded corners
      as the pre-save box so it reads as a deliberate "listen" chip. */
@@ -45,7 +47,10 @@ import MailingList from './MailingList.astro';
   .player iframe{display:block}
   /* revealed only when the player is blocked (see script); it stands in for the empty player */
   .player-fallback{margin:0;font-size:.9rem}
-  .player-fallback a{color:inherit;text-decoration:underline}
+  /* no underline — a small ↗ marks it as a link instead (nudges on hover) */
+  .player-fallback a{color:inherit;text-decoration:none}
+  .player-fallback a::after{content:"\00A0\2197";display:inline-block;opacity:.75;transition:transform .12s ease}
+  .player-fallback a:hover::after{transform:translate(1px,-1px);opacity:1}
 </style>
 
 <script is:inline>
