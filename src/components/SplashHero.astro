@@ -17,6 +17,9 @@ import MailingList from './MailingList.astro';
         src="https://bandcamp.com/EmbeddedPlayer/album=2488495139/size=small/bgcol=ffffff/linkcol=63b2cc/artwork=none/track=1833649138/transparent=true/"
         seamless><a href="https://robocobraquartet.bandcamp.com/album/hundred-pieces">Hundred Pieces by Robocobra Quartet</a></iframe>
     </div>
+    {/* Always-visible fallback: privacy browsers (e.g. Firefox/Iceraven ETP) block the Bandcamp
+        frame and show a blank box, so this guarantees a working path to the track for everyone. */}
+    <p class="player-fallback"><a href="https://robocobraquartet.bandcamp.com/track/haha" target="_blank" rel="noopener">Listen to <em>Haha</em> on Bandcamp ↗</a></p>
     {/* <PreSave /> */}{/* pre-save/pre-add buttons hidden for now (album out) */}
     <MailingList />
   </div>
@@ -35,4 +38,7 @@ import MailingList from './MailingList.astro';
      as the pre-save box so it reads as a deliberate "listen" chip. */
   .player{width:100%;max-width:420px;margin:0 auto;border-radius:9px;overflow:hidden;line-height:0}
   .player iframe{display:block}
+  /* sits just under the player; small and subtle so it reads as a secondary "listen" link */
+  .player-fallback{margin:-.5rem 0 0;font-size:.8rem;opacity:.85}
+  .player-fallback a{color:inherit}
 </style>
