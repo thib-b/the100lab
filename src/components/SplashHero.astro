@@ -9,36 +9,99 @@ import MailingList from './MailingList.astro';
 <section class="splash">
   <h1 class="sr-only">Robocobra Quartet — Hundred Pieces</h1>
   <div class="notify scrim">
-    <p class="eyebrow">Hundred Pieces - Out November 13th</p>
+    <p class="eyebrow"><a href="https://robocobraquartet.bandcamp.com/" target="_blank" rel="noopener">Hundred Pieces - Out November 13th</a></p>
     {/* Bandcamp "Haha" taster from Hundred Pieces. */}
     <div class="player">
-      <iframe title="Robocobra Quartet — Haha (Bandcamp player)" loading="lazy"
+      <iframe title="Robocobra Quartet — Haha (Bandcamp player)"
         style="border:0;width:100%;height:42px;"
         src="https://bandcamp.com/EmbeddedPlayer/album=2488495139/size=small/bgcol=ffffff/linkcol=63b2cc/artwork=none/track=1833649138/transparent=true/"
         seamless><a href="https://robocobraquartet.bandcamp.com/album/hundred-pieces">Hundred Pieces by Robocobra Quartet</a></iframe>
     </div>
-    {/* Always-visible fallback: privacy browsers (e.g. Firefox/Iceraven ETP) block the Bandcamp
-        frame and show a blank box, so this guarantees a working path to the track for everyone. */}
-    <p class="player-fallback"><a href="https://robocobraquartet.bandcamp.com/track/haha" target="_blank" rel="noopener">Listen to <em>Haha</em> on Bandcamp ↗</a></p>
+    {/* Fallback shown ONLY when a privacy browser (Firefox/Iceraven ETP, content blockers) blocks the
+        Bandcamp frame; the script below detects that, hides the empty player and reveals this link. */}
+    <p class="player-fallback" hidden><a href="https://robocobraquartet.lnk.to/Haha" target="_blank" rel="noopener">Listen to <em>Haha</em></a></p>
     {/* <PreSave /> */}{/* pre-save/pre-add buttons hidden for now (album out) */}
     <MailingList />
   </div>
 </section>
 <style>
-  /* Reserve roughly the space above the centred stamp so the card sits just below the stamp
-     and stays fully on-screen; the footer then follows (a short scroll away, which is fine).
-     dvh keeps mobile browser chrome from inflating the height. */
-  .splash{min-height:calc(100dvh - 200px);display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+  /* The stamp (GrowthGround) is viewport-fixed, centred at 40% of the viewport height with size
+     min(44dvh, 80vw), so its bottom sits at ~calc(40dvh + min(22dvh, 40vw)). We anchor the card just
+     below it. The inline script sets an exact padding-top (subtracting the nav's height so there's no
+     dead gap); this calc is the no-JS fallback — viewport-relative, so it always clears the stamp, it
+     just leaves a little more gap without JS. Content then flows top-down; on short screens the footer
+     scrolls a touch below the fold (fine), on tall screens it sits comfortably on-screen. */
+  .splash{padding-top:calc(40dvh + min(22dvh, 40vw) + 1rem);display:flex;flex-direction:column;align-items:center}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .notify{width:100%;max-width:460px;padding:1rem 1.2rem;text-align:center;
     display:flex;flex-direction:column;align-items:center;gap:1rem}
   .eyebrow{margin:0;text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;opacity:.9}
+  .eyebrow a{color:inherit;text-decoration:none}
+  .eyebrow a:hover{text-decoration:underline}
   /* Bandcamp's small player picks a light/dark theme from bgcol's luminance (ffffff = light,
      to match the white email field / cream button); framed with the same 9px rounded corners
      as the pre-save box so it reads as a deliberate "listen" chip. */
   .player{width:100%;max-width:420px;margin:0 auto;border-radius:9px;overflow:hidden;line-height:0}
   .player iframe{display:block}
-  /* sits just under the player; small and subtle so it reads as a secondary "listen" link */
-  .player-fallback{margin:-.5rem 0 0;font-size:.8rem;opacity:.85}
-  .player-fallback a{color:inherit}
+  /* revealed only when the player is blocked (see script); it stands in for the empty player */
+  .player-fallback{margin:0;font-size:.9rem}
+  .player-fallback a{color:inherit;text-decoration:underline}
 </style>
+
+<script is:inline>
+  // Position the splash card (+ the footer that follows it) via .splash padding-top, choosing the
+  // larger of two goals so the middle of the screen stays open:
+  //   • hug the bottom  — when everything fits, drop the card + social links to the bottom edge,
+  //     leaving the empty space between the stamp and the card (what the eye reads as "centre").
+  //   • clear the stamp — the floor: never let the card ride up over the stamp; on short screens this
+  //     wins and the footer simply scrolls a touch below the fold.
+  // The stamp is viewport-fixed (src/lib/growth.ts: centre at 40% height, size min(44% H, 80% W)).
+  (function () {
+    function place() {
+      var s = document.querySelector('.splash');
+      if (!s) return;
+      var footer = document.querySelector('footer');
+      var sy = window.scrollY || 0;
+      s.style.paddingTop = '0px';                                   // measure from a zero baseline
+      var splashTop = s.getBoundingClientRect().top + sy;
+      var stampBottom = innerHeight * 0.40 + Math.min(innerHeight * 0.44, innerWidth * 0.80) / 2;
+      var clearPad = stampBottom + 16 - splashTop;                 // card sits 16px under the stamp
+      var hugPad = footer ? (innerHeight - 32 - (footer.getBoundingClientRect().bottom + sy)) : clearPad;
+      s.style.paddingTop = Math.max(0, Math.round(Math.max(clearPad, hugPad))) + 'px';
+    }
+    if (!window.__splashPlaceBound) {
+      window.__splashPlaceBound = true;
+      addEventListener('resize', place);
+      addEventListener('orientationchange', place);
+      document.addEventListener('astro:page-load', place);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(place); // nav height settles with the font
+    }
+    place();
+  })();
+</script>
+
+<script is:inline>
+  // The Bandcamp player is a third-party frame that privacy browsers (Firefox/Iceraven ETP, content
+  // blockers) block, leaving an empty box. A frame that actually loads fires the iframe 'load' event
+  // (this inline script attaches the listener before the network load completes); a blocked frame
+  // never does. So: if load hasn't fired after a grace period, hide the empty player and reveal the
+  // fallback link instead. Default markup keeps the player visible + fallback hidden, so working
+  // browsers never flash the link.
+  (function () {
+    function decide() {
+      var player = document.querySelector('.player');
+      var iframe = player && player.querySelector('iframe');
+      var fb = document.querySelector('.player-fallback');
+      if (!player || !iframe || !fb || iframe.dataset.fbBound) return;
+      iframe.dataset.fbBound = '1';
+      var settled = false;
+      iframe.addEventListener('load', function () { settled = true; player.hidden = false; fb.hidden = true; });
+      setTimeout(function () { if (!settled) { player.hidden = true; fb.hidden = false; } }, 3000);
+    }
+    if (!window.__hahaFallbackBound) {
+      window.__hahaFallbackBound = true;
+      document.addEventListener('astro:page-load', decide);
+    }
+    decide();
+  })();
+</script>
