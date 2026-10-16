@@ -1,0 +1,33 @@
+name: Add past gigs from Songkick
+on:
+  # 23:30 UTC = 00:30 Irish summer time, after that evening's gig has finished.
+  schedule: [{ cron: "30 23 * * *" }]
+  workflow_dispatch:
+permissions: { contents: write, pull-requests: write }
+jobs:
+  add-past-gigs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - id: gigs
+        run: |
+          {
+            echo 'added<<EOF'
+            node scripts/add-past-gigs.mjs
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: auto/past-gigs
+          commit-message: "content: add past gigs from Songkick"
+          title: "Add past gigs from Songkick"
+          body: |
+            New past gigs found on Songkick:
+
+            ${{ steps.gigs.outputs.added }}
+
+            Check the wording against the archive style before merging. Merging deploys the site.
+          add-paths: src/data/pastTourDates.ts
+          delete-branch: true
