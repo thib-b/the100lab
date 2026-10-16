@@ -3,6 +3,7 @@
 export type PastTourDate = { date: string; location: string };
 
 export const pastTourDates: PastTourDate[] = [
+  { date: "10/10/26", location: "Spirit Store, Bold Frontiers Festival, Dundalk, IE" },
   { date: "16/05/26", location: "Love Is A Stranger Festival, Sligo, IE" },
   { date: "17/04/26", location: "Sonorities Festival, Belfast, NI" },
   { date: "25/04/25", location: "L'Aeronef, Lille, FR" },
