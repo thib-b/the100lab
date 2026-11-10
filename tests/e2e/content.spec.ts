@@ -16,6 +16,7 @@ test('image press shots load', async ({ page }) => {
   await page.goto('/image/');
   const img = page.locator('img[src="/assets/images/RQ1.jpeg"]');
   await expect(img).toBeVisible();
+  await expect(page.locator('img[src="/assets/images/RQ_PressShot3_Niamh_Barry_web.jpg"]')).toBeVisible();
 });
 test('tour mounts the songkick widget', async ({ page }) => {
   await page.goto('/tour/');
