@@ -1,27 +1,25 @@
 ---
 // The visible title is grown by the GrowthGround canvas (the stamp reveal, upper-centre).
-// This splash reuses the same MailingList form as /contact/ (a slim signup posting straight to
-// the EmailOctopus endpoint, no third-party JS), kept toward the lower centre so the reveal
-// stays clear above it on short screens.
-import MailingList from './MailingList.astro';
+// With the album out, the splash carries the full Bandcamp album player (artwork + tracklist)
+// instead of the old single-track taster + mailing-list signup, so the card reads as "listen now"
+// and sits toward the lower centre, clear of the reveal above it.
 // import PreSave from './PreSave.astro'; // pre-save/pre-add buttons hidden for now (album out)
 ---
 <section class="splash">
   <h1 class="sr-only">Robocobra Quartet — Hundred Pieces</h1>
   <div class="notify scrim">
     <p class="eyebrow"><a href="https://robocobraquartet.bandcamp.com/album/hundred-pieces" target="_blank" rel="noopener">Hundred Pieces - Out now</a></p>
-    {/* Bandcamp "Haha" taster from Hundred Pieces. */}
+    {/* Full Bandcamp album player (artwork + tracklist); the 100-track list scrolls inside the frame. */}
     <div class="player">
-      <iframe title="Robocobra Quartet — Haha (Bandcamp player)"
-        style="border:0;width:100%;height:42px;"
-        src="https://bandcamp.com/EmbeddedPlayer/album=2488495139/size=small/bgcol=ffffff/linkcol=63b2cc/artwork=none/track=1833649138/transparent=true/"
+      <iframe title="Robocobra Quartet — Hundred Pieces (Bandcamp player)"
+        style="border:0;width:100%;height:300px;"
+        src="https://bandcamp.com/EmbeddedPlayer/album=2488495139/size=large/bgcol=ffffff/linkcol=63b2cc/artwork=small/transparent=true/"
         seamless><a href="https://robocobraquartet.bandcamp.com/album/hundred-pieces">Hundred Pieces by Robocobra Quartet</a></iframe>
     </div>
     {/* Fallback shown ONLY when a privacy browser (Firefox/Iceraven ETP, content blockers) blocks the
         Bandcamp frame; the script below detects that, hides the empty player and reveals this link. */}
-    <p class="player-fallback" hidden><a href="https://robocobraquartet.lnk.to/Haha" target="_blank" rel="noopener">Listen to <em>Haha</em></a></p>
+    <p class="player-fallback" hidden><a href="https://robocobraquartet.bandcamp.com/album/hundred-pieces" target="_blank" rel="noopener">Listen to <em>Hundred Pieces</em></a></p>
     {/* <PreSave /> */}{/* pre-save/pre-add buttons hidden for now (album out) */}
-    <MailingList />
   </div>
 </section>
 <style>
